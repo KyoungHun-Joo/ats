@@ -68,13 +68,21 @@ function compareRSI(){
   const reverseRSI = inputRSI.values.reverse();
   const compareRSI = inputRSI.values.slice(90);
   const nowRSI     = inputRSI.values[inputRSI.values.length];
+  const rowPoint   = 33.3;
+  const highPoint  = 66.6;
+
   var lowRsiFlag = false;
-  
   var updownFlag = false;
+
   var downMaintenance = true;
   var upMaintenance = false;
-  var veryUpMaintenance = false;
+
+  var veryUpMaintenance = false; //과매수가 유지될경우
   var veryDownMaintenance = false;
+
+  var turnToHign = false;
+  var turnToRow  = false;
+
   compareRSI.forEach((RSI,index)=>{
     const beforeRSI = compareRSI[index-1];
     if(beforeRSI < RSI){
@@ -82,22 +90,22 @@ function compareRSI(){
     }else{
       updownFlag = false;
     } 
-
     
     //buy 전 매수 포인트 찾기
     if(currentStatus){
-      if(RSI > 30) downMaintenance = false;  
+      if(RSI > rowPoint) downMaintenance = false;  
+     
       
     //sell 전 매도 포인트 찾기
     }else{
-      if(RSI < 70) upMaintenance = false;  
+      if(RSI < highPoint) upMaintenance = false;  
 
     }
-    if(nowRSI < 33.3){
+    if(nowRSI < rowPoint){
       buy();
     }
   
-    if(nowRSI < 66.6){
+    if(nowRSI > highPoint){
       sell();
     }
 
@@ -111,6 +119,8 @@ function compareRSI(){
   })
 
   if(currentStatus){
+
+  }else{
   }
 
 }
