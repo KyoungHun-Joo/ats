@@ -1,8 +1,7 @@
 # Build and Release Folders
 bin-debug/
 node_modules/
-[Oo]bj/
-[Bb]in/
+db_con.js
 
 # Other files and folders
 .settings/
