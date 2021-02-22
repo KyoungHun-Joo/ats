@@ -1,24 +1,22 @@
+process.env.TZ = 'Asia/Seoul'
+
 const rp = require('request-promise');
 const api = "/v2/cryptocurrency/quotes/latest";
 const API_KEY = require('./config')();
 const mysql_dbc = require('./db_con')();
 const Bithumb = require('./bithumb');
 const bithumb = new Bithumb();
-
 const RSI = require('technicalindicators').RSI;
 const lowPoint   = 33.3;
 const highPoint  = 66.6;
 var connection;
 
-  console.log('bithumb',bithumb)
-
   var rgParams = {
     order_currency:'BTC',
     payment_currency:'KRW'
   };
-  var result = bithumb.xcoinApiCall('/info/account', rgParams);
-  console.log('resul',result)
-return;
+  //var result = bithumb.xcoinApiCall('/info/account', rgParams);
+
 const requestOptions = {
   method: 'GET',
   uri: 'https://pro-api.coinmarketcap.com'+api,
@@ -166,7 +164,6 @@ async function call(event, context, callback) {
     var response = await rp(requestOptions);
     var data = response.data[1027];
 
-    msg= "test1"+data.quote.KRW.price;
     if(data && data.quote.KRW.price){
       coinPrice=data.quote.KRW.price;
       const ret1 = await connection.query("INSERT INTO price (date_key, cmc_id, slug, name, price) VALUES ('"+cmc_key+"', '"+data.id+"', '"+data.slug+"', '"+data.name+"', '"+data.quote.KRW.price+"')")
@@ -177,11 +174,11 @@ async function call(event, context, callback) {
         inputRSI.values.push(priceData[i].price)
       }
 
-      const rsiRes = RSI.calculate(inputRSI);
+      const rsiRes = await RSI.calculate(inputRSI);
+
       const lastRSI = rsiRes[rsiRes.length-1];
       await connection.query("UPDATE price SET rsi = "+lastRSI+" WHERE date_key = '"+cmc_key+"'")
-      console.log('cmc_key'+cmc_key)
-      console.log('rsi'+lastRSI)
+
       await compareRSI1(connection, rsiRes,lastRSI,data.quote.KRW.price);
       await compareRSI2(connection, rsiRes,lastRSI,data.quote.KRW.price);
 
@@ -204,4 +201,5 @@ async function call(event, context, callback) {
   }
 
 }
+
 exports.handler = call;
