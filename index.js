@@ -150,7 +150,31 @@ async function compareRSI2(connection, rsiArr,lastRSI){
   }
 
 }
+async function recall(){
+  connection = await mysql_dbc.init();
+  var inputRSI = {
+    values:[],
+    period : 14
+  }
 
+  const [priceData, fields] = await connection.execute("SELECT * FROM price ORDER BY date_key DESC");
+
+  for(let i=0; i<priceData.length; i++){
+    inputRSI.values.push(priceData[i].price)
+    console.log('test',priceData[i],priceData[i].date_key)
+    const rsiRes = await RSI.calculate(inputRSI);
+    const lastRSI = rsiRes[rsiRes.length-1];
+
+    await connection.query("UPDATE price SET rsi = "+lastRSI+" WHERE date_key = '"+priceData[i].date_key+"'");
+
+
+  }
+
+
+}
+
+recall();
+return;
 async function call(event, context, callback) {
   connection = await mysql_dbc.init();
   var inputRSI = {
