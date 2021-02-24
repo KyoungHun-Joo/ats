@@ -59,17 +59,19 @@ async function bithumbCall(type,coinPrice,unit){
   var rgParams = {
     order_currency:'ETC',
     payment_currency:'KRW',
-    units:unit,
-    price:coinPrice
+    units:unit.toString(),
+    price:coinPrice.toString()
   };
-  
+
   if(type=="buy"){
     rgParams['type'] = 'bid';
   }else if(type=='sell'){
-    rgParams['type'] = 'ask';    
+    rgParams['type'] = 'ask';
   }
   console.log('coin api call',rgParams)
-  var result = await bithumb.xcoinApiCall('/trade/place', rgParams);
+  var result = JSON.parse(await bithumb.xcoinApiCall('/trade/place', rgParams));
+  console.log('coin api result msg',result.message)
+
   console.log('coin api result',result)
   return (result.status==0000)? result.order_id:"";
 }
@@ -77,7 +79,7 @@ async function bithumbCall(type,coinPrice,unit){
 async function buy(type,amount,coinPrice){
   var lockAmount = (amount/coinPrice).toFixed(8);
   amount -= lockAmount*coinPrice;
-  
+
   var order_id = await bithumbCall('buy',coinPrice,amount);
 
   await connection.execute("UPDATE variable SET value = "+amount+",status=2 lockAmount = "+lockAmount+" WHERE `key` = '"+type+"'");
@@ -94,31 +96,38 @@ async function sell(type,lockAmount,coinPrice){
 
   const [data, fields] = await connection.execute("SELECT buysellPrice FROM trade_log where `type` = '"+type+"' AND `buysell` = 1 ORDER BY createdAt DESC LIMIT 0,1");
   var buysellPrice = data[0].buysellPrice;
+console.log('buysellPrice',buysellPrice*1.01)
+  //if(buysellPrice>0 && buysellPrice*1.01 > coinPrice) return;
+console.log('pass')
+  var order_id = await bithumbCall('sell',coinPrice,lockAmount);
+  if(order_id){
+    await connection.execute("UPDATE variable SET value = value + "+value+",status=1 lockAmount = 0 WHERE `key` = '"+type+"'");
 
-  if(buysellPrice>0 && buysellPrice*1.01 > coinPrice) return;
+    await connection.query("INSERT INTO trade_log (type, price, lockAmount, buysell,buysellPrice, order_id) VALUES ('"
+    +type+"', '"+value+"', '"+lockAmount+"',2,'"+coinPrice+"','"+order_id+"')")
+  }
 
-  var order_id = await bithumbCall('sell',coinPrice,value);
-
-  await connection.execute("UPDATE variable SET value = value + "+value+",status=1 lockAmount = 0 WHERE `key` = '"+type+"'");
-
-  await connection.query("INSERT INTO trade_log (type, price, lockAmount, buysell,buysellPrice, order_id) VALUES ('"
-  +type+"', '"+value+"', '"+lockAmount+"',2,'"+coinPrice+"','"+order_id+"')")
   return;
 }
 
 async function compareRSI1(connection, rsiArr,lastRSI,coinPrice){
+  var type = 'money1'
 
-  const [data, fields] = await connection.execute("SELECT value,lockAmount,status FROM variable where `key` = 'money1'");
+  type = "money3";
+
+  const [data, fields] = await connection.execute("SELECT value,lockAmount,status FROM variable where `key` = '"+type+"'");
+
   var money = data[0].value;
   var lockAmount = data[0].lockAmount;
   var status = data[0].status;
-  
+
   //매수전
   if(status == 3){
-    if(lastRSI<=lowPoint) await buy('money1',money,coinPrice)
+    if(lastRSI<=lowPoint) await buy(type,money,coinPrice)
   //매도전
   }else if(status == 4){
-    if(lastRSI>=highPoint) await sell('money1',lockAmount,coinPrice)
+     await sell(type,lockAmount,coinPrice)
+    if(lastRSI>=highPoint) await sell(type,lockAmount,coinPrice)
   }
 }
 
@@ -162,28 +171,28 @@ async function compareRSI2(connection, rsiArr,lastRSI){
 async function checkOrder(){
 
   const [data, fields] = await connection.execute("SELECT * FROM trade_log WHERE status=0 ");
-  
+
   for(let i=0;i<data.length-1;i++){
-    
+
     var result = bithumb.xcoinApiCall('/info/order_detail', {
       order_currency:'ETC',
       order_id:data[i].order_id,
     });
-    
+
     var status = 0;
     var trade_amount =0;
     var trade_fee =0;
     var trade_units =0;
     if(data.length<1) return true;
-  
+
     if(result.data[0].order_status=="Completed"){
       status=1;
-  
+
       for(let i=0; i<result.data[0].contract.length; i++){
         trade_amount += Number(result.data[0].contract[i].total);
         trade_fee += Number(result.data[0].contract[i].fee);
         trade_units += Number(result.data[0].contract[i].units);
-      } 
+      }
       await connection.execute("UPDATE trade_log SET status = "+status+",price='"
       +trade_amount+"',lockAmount='"+trade_units+"',fee='"+trade_fee+"' WHERE `id` = '"+result.data[0].id+"'");
       //구매완료
@@ -218,16 +227,16 @@ async function call(event, context, callback) {
 
     if(data && data.quote.KRW.price){
       coinPrice=data.quote.KRW.price;
-      const ret1 = await connection.query("INSERT INTO price (date_key, cmc_id, slug, name, price) VALUES ('"+cmc_key+"', '"+data.id+"', '"+data.slug+"', '"+data.name+"', '"+data.quote.KRW.price+"')")
+      //const ret1 = await connection.query("INSERT INTO price (date_key, cmc_id, slug, name, price) VALUES ('"+cmc_key+"', '"+data.id+"', '"+data.slug+"', '"+data.name+"', '"+data.quote.KRW.price+"')")
 
       const [priceData, fields] = await connection.execute("SELECT * FROM price ORDER BY date_key DESC LIMIT 1000");
-      
+
       for(let i=priceData.length-1; i>=0; i--) await inputRSI.values.push(priceData[i].price)
 
       const rsiRes = await RSI.calculate(inputRSI);
 
       const lastRSI = rsiRes[rsiRes.length-1];
-      await connection.query("UPDATE price SET rsi = "+lastRSI+" WHERE date_key = '"+cmc_key+"'")
+     // await connection.query("UPDATE price SET rsi = "+lastRSI+" WHERE date_key = '"+cmc_key+"'")
 
       await compareRSI1(connection, rsiRes,lastRSI,data.quote.KRW.price);
       await compareRSI2(connection, rsiRes,lastRSI,data.quote.KRW.price);
@@ -270,4 +279,6 @@ async function recall(){
     await connection.query("UPDATE price SET rsi = "+lastRSI+" WHERE date_key = '"+priceData[i].date_key+"'");
   }
 }
+
+call();
 exports.handler = call;

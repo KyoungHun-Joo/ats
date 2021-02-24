@@ -88,6 +88,7 @@ function http_build_query(obj) {
 			output_string.push(query)
 		}
 		else {
+
 			var value = encodeURIComponent(obj[val].replace(/[!'()*]/g, escape));
 			output_string.push(key + '=' + value)
 		}
