@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "aws-sdk": "^2.852.0",
     "mysql2": "^2.2.5",
     "request": "^2.88.2",
     "request-promise": "^4.2.6",

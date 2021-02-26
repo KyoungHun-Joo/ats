@@ -83,15 +83,15 @@ function http_build_query(obj) {
 		var key = val;
 		key = encodeURIComponent(key.replace(/[!'()*]/g, escape));
 
-		if (typeof obj[val] === 'object') {
-			var query = build_query(obj[val], null, key)
-			output_string.push(query)
-		}
-		else {
 
-			var value = encodeURIComponent(obj[val].replace(/[!'()*]/g, escape));
+			if(val=="units" || val=="price"){
+				var value = obj[val];
+			}else{
+				var value = encodeURIComponent(obj[val].replace(/[!'()*]/g, escape));
+			}
+			
 			output_string.push(key + '=' + value)
-		}
+		
 	})
 
 	return output_string.join('&');
