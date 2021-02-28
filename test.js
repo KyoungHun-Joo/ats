@@ -1,12 +1,18 @@
 const mysql_dbc = require('./db_con')();
+const RSI = require('technicalindicators').RSI;
 
 var connection;
-const gap = 4;
+const gap = 2;
 const lowPoint = 33.3+gap;
 const highPoint = 66.6-gap;
 
-async function call(){
+var inputRSI = {
+  values:[],
+  period : 14
+}
 
+async function call(){
+  console.log('call in')
   connection = await mysql_dbc.init();
 
   var buy = false;
@@ -17,7 +23,9 @@ async function call(){
   var nowPrice = 0;
   const [priceData, fields] = await connection.execute("SELECT * FROM price ORDER BY date_key DESC LIMIT 1000");
 
+
   for(let i=priceData.length-1; i>=0; i--){
+    inputRSI.values.push(priceData[i].price)
     nowPrice = priceData[i].price;
     if(!buy && priceData[i].rsi <=lowPoint){
 
@@ -37,12 +45,16 @@ async function call(){
       }
     }
 
-  } 
-  console.log('buyCnt = ', buyCnt)      
+  }
+
+  const rsiRes = await RSI.calculate(inputRSI);
+  const lastRSI = rsiRes[rsiRes.length-1];
+  console.log('lastRSI', lastRSI)
+  console.log('buyCnt = ', buyCnt)
   console.log('left = ', born)
   console.log('unit = ', unit)
-  console.log('buyPrice = ', buyPrice)    
-  console.log('nowPrice = ', nowPrice)      
+  console.log('buyPrice = ', buyPrice)
+  console.log('nowPrice = ', nowPrice)
 
 }
 

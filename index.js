@@ -81,7 +81,7 @@ async function bithumbCall(type,coinPrice,unit){
 }
 
 async function buy(type,amount,coinPrice){
-  
+
   var lockAmount = Math.floor((amount/coinPrice)*1000)/1000;
   amount -= lockAmount*coinPrice;
 
@@ -106,8 +106,10 @@ async function sell(type,lockAmount,coinPrice){
   const [data, fields] = await connection.execute("SELECT buysellPrice FROM trade_log where `type` = '"+type+"' AND `buysell` = 1 ORDER BY createdAt DESC LIMIT 0,1");
   var buysellPrice = data[0].buysellPrice;
 
-  if(buysellPrice>0 && buysellPrice*1.01 > coinPrice) return;
-
+  //if(buysellPrice>0 && buysellPrice*1.0125 > coinPrice){
+  //  console.log('buysellPrice not valid',buysellPrice,coinPrice)
+  //  return;
+  //}
   var order_id = await bithumbCall('sell',coinPrice,lockAmount);
   if(order_id){
     await connection.execute("UPDATE variable SET value = value + "+value+",status=1, lockAmount = 0 WHERE `key` = '"+type+"'");
@@ -137,32 +139,34 @@ async function compareRSI1(connection, rsiArr,lastRSI,coinPrice){
   }
 }
 
+//급등락 대비
 async function compareRSI2(connection, rsiArr,lastRSI){
 
   const [data, fields] = await connection.execute("SELECT value,lockAmount,status FROM variable where `key` = 'money2'");
   var money = data[0].value;
   var status = data[0].status;
 
-  const compareRSI = rsiArr.slice(-5);
+  const compareRSI = rsiArr.slice(-20);
 
   var turnToHigh = false;
   var turnToLow = false;
 
 
   for(let i=compareRSI.length-1; i>=0; i--){
+    const beforeCompare2 = compareRSI[i-2];
     const beforeCompare = compareRSI[i-1];
     const compare = compareRSI[i];
 
     if(compare>lowPoint) turnToHigh = false;
 
-    if(beforeCompare<lowPoint && compare>lowPoint) turnToHigh = true;
+    if(beforeCompare2<lowPoint && beforeCompare<lowPoint && compare>lowPoint) turnToHigh = true;
 
     if(compare<highPoint) turnToLow = false;
 
-    if(beforeCompare>highPoint && compare<highPoint) turnToLow = true;
+    if(beforeCompare2>highPoint && beforeCompare>highPoint && compare<highPoint) turnToLow = true;
 
   }
-  
+
   //매수전
   if(status==3 && turnToHigh){
     await buy('money2',money,coinPrice)
@@ -173,6 +177,39 @@ async function compareRSI2(connection, rsiArr,lastRSI){
 
 }
 
+//3시간 RSI 평균값으로 매수,매도 시점 계산
+async function compareRSI3(connection, rsiArr,lastRSI){
+
+    const [data, fields] = await connection.execute("SELECT value,lockAmount,status FROM variable where `key` = 'money3'");
+    var money = data[0].value;
+    var status = data[0].status;
+
+    const compareRSI = rsiArr.slice(-12);
+    var totalRSI = 0;
+
+
+    for(let i=0; i<compareRSI.length; i++){
+      totalRSI += compareRSI[i];
+    }
+
+    const avgRSI = (totalRSI/12)
+    const avgGap = 10;
+
+    if(lastRSI<=lowPoint)await buy(type,money,coinPrice)
+
+    //매수전
+    if(status==3 && lastRSI <= (avgRSI-avgGap)){
+      await buy('money3',money,coinPrice)
+    //매도전
+  }else if(status==4 && lastRSI >= (avgRSI+avgGap)){
+      await sell('money3',money,coinPrice)
+    }
+}
+
+//오래 머무른 거래 만료
+async function expire(){
+
+}
 
 async function checkOrder(){
 
@@ -212,7 +249,7 @@ async function checkOrder(){
 
       return false;
     }
-  
+
   }
 
 
@@ -228,7 +265,7 @@ async function call(event, context, callback) {
 
   try{
     checkOrder();
-        
+
     const requestOptions2 = {
       method: 'GET',
       uri: 'https://api.bithumb.com/public/orderbook/ETH_KRW',
@@ -258,9 +295,14 @@ async function call(event, context, callback) {
 
       const lastRSI = rsiRes[rsiRes.length-1];
       await connection.query("UPDATE price SET rsi = "+lastRSI+" WHERE date_key = '"+cmc_key+"'")
+      if(lastRSI>0){
+        await compareRSI1(connection, rsiRes,lastRSI,coinPrice);
+        await compareRSI2(connection, rsiRes,lastRSI,coinPrice);
 
-      await compareRSI1(connection, rsiRes,lastRSI,coinPrice);
-      await compareRSI2(connection, rsiRes,lastRSI,coinPrice);
+      }else{
+        await connection.query("INSERT INTO log (text) VALUES ('no rsi"+lastRSI+"')");
+
+      }
 
       await connection.release();
 
