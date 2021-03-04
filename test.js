@@ -1,5 +1,7 @@
 const mysql_dbc = require('./db_con')();
 const RSI = require('technicalindicators').RSI;
+const volatility = require('./strategy/volatility')
+const lowRsiBuy = require('./strategy/lowRsiBuy')
 
 var connection;
 const gap = 2;
@@ -21,7 +23,7 @@ async function call(){
   var born = 45000;
   var unit = 0;
   var nowPrice = 0;
-  const [priceData, fields] = await connection.execute("SELECT * FROM price ORDER BY date_key DESC LIMIT 1000");
+  const [priceData, fields] = await connection.execute("SELECT * FROM price2 ORDER BY createdAt DESC LIMIT 3000");
 
 
   for(let i=priceData.length-1; i>=0; i--){
@@ -48,6 +50,9 @@ async function call(){
   }
 
   const rsiRes = await RSI.calculate(inputRSI);
+
+  const [sell,tradePrice] = await lowRsiBuy(connection,priceData);
+return;
   const lastRSI = rsiRes[rsiRes.length-1];
   console.log('lastRSI', lastRSI)
   console.log('buyCnt = ', buyCnt)

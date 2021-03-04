@@ -42,8 +42,7 @@ function getCmcKey(){
   var month = numberPad(new Date().getMonth()+1);
   var day = numberPad(new Date().getDate());
   var hour = numberPad(new Date().getHours());
-  var hour = numberPad(new Date().getHours());
-  var min = new Date().getMinutes();
+  var min = numberPad(new Date().getMinutes());
 
   var period = 1;
 
@@ -120,7 +119,7 @@ async function sell(type,lockAmount,coinPrice,test=false){
   const [data, fields] = await connection.execute("SELECT buysellPrice FROM trade_log where `type` = '"+type+"' AND `buysell` = 1 ORDER BY createdAt DESC LIMIT 0,1");
   var buysellPrice = data[0].buysellPrice;
 
-  if(type=="money4" && buysellPrice>0 && buysellPrice*1.0125 > coinPrice){
+  if(buysellPrice>0 && buysellPrice*1.0125 > coinPrice){
     console.log('buysellPrice not valid',buysellPrice,coinPrice)
     return;
   }
@@ -204,6 +203,14 @@ async function compareRSI2(connection, rsiArr,lastRSI){
     if(beforeCompare2>highPoint && beforeCompare>highPoint && compare<highPoint) turnToLow = true;
 
   }
+  //rsi 20 아래로 떨어지면 그냥 구매
+  if(lastRSI<20){
+    turnToHigh = true;
+  }
+  
+  if(lastRSI>80){
+    turnToLow = true;
+  }
   console.log('call '+type,beforeCompare2,beforeCompare,compare,lastRSI);
 
   //매수전
@@ -286,7 +293,8 @@ async function checkOrder(){
 
 
     if(result.data.order_status=="Completed"){
-
+      const [leftValue, fileds] = await connection.execute("SELECT value FROM variable WHERE status=0 AND type = '"+data[i].value+"' ");
+      
       for(let j=0; j<result.data.contract.length; j++){
         trade_amount += Number(result.data.contract[j].total);
         trade_fee += Number(result.data.contract[j].fee);
@@ -299,6 +307,7 @@ async function checkOrder(){
       if(result.data.type=='bid'){
         await connection.execute("UPDATE variable SET status = 4,lockAmount = '"+trade_units+"' WHERE `key` = '"+data[i].type+"'");
       }else if(result.data.type=='ask'){
+        trade_amount += leftValue.value;
         await connection.execute("UPDATE variable SET status = 3,value = '"+trade_amount+"' WHERE `key` = '"+data[i].type+"'");
       }
       return true;
@@ -346,7 +355,7 @@ async function call(event, context, callback) {
       const ret1 = await connection.query("INSERT INTO "+priceTable+" (date_key, cmc_id, slug, name, price) VALUES ('"
       +cmc_key+"', '1027', 'ETH', 'Ethereum', '"+coinPrice+"')")
 
-      const [priceData, fields] = await connection.execute("SELECT * FROM "+priceTable+" ORDER BY date_key DESC LIMIT 1000");
+      const [priceData, fields] = await connection.execute("SELECT * FROM "+priceTable+" ORDER BY createdAt DESC LIMIT 1000");
 
       for(let i=priceData.length-1; i>=0; i--) await inputRSI.values.push(priceData[i].price)
 
@@ -360,7 +369,7 @@ async function call(event, context, callback) {
         await compareRSI1(connection, rsiRes,lastRSI,coinPrice);
         await compareRSI2(connection, rsiRes,lastRSI,coinPrice);
         //await compareRSI3(connection, rsiRes,lastRSI,coinPrice);
-        await compareRSI4(connection, inputRSI, coinprice);
+        //await compareRSI4(connection, inputRSI, coinPrice);
       }else{
         await connection.query("INSERT INTO log (text) VALUES ('no rsi"+lastRSI+"')");
 
