@@ -2,7 +2,8 @@ const mysql_dbc = require('./db_con')();
 const RSI = require('technicalindicators').RSI;
 const volatility = require('./strategy/volatility')
 const lowRsiBuy = require('./strategy/lowRsiBuy')
-
+const API_KEY = require('./config')();
+const rp = require('request-promise');
 var connection;
 const gap = 2;
 const lowPoint = 33.3+gap;
@@ -15,6 +16,37 @@ var inputRSI = {
 
 async function call(){
   console.log('call in')
+
+  const requestOptions2 = {
+    method: 'GET',
+    uri: 'https://api.bithumb.com/public/orderbook/ALL_KRW',
+    headers: {
+      'X-CMC_PRO_API_KEY': API_KEY[0]
+    },
+    qs: {
+      'count': '1'
+    },
+    json: true,
+    gzip: true
+  };
+  const coinArr = ['BTC','ETH','GRS','XEM','ONG','ADA','EOS'];
+
+
+  var response = await rp(requestOptions2);
+  if(response.status == "0000"){
+    var coinDatas = response.data;
+
+    for(let i=0;i<Object.keys(coinDatas).length;i++){
+      if(coinArr.includes(Object.keys(coinDatas)[i])){
+        const coinKey = Object.keys(coinDatas)[i];
+        const coinPrice = coinDatas[coinKey].bids[0].price
+
+        console.log('exiest',coinPrice)
+      }
+    }
+  }
+
+return;
   connection = await mysql_dbc.init();
 
   var buy = false;
