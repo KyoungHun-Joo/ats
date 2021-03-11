@@ -8,7 +8,9 @@ var connection;
 const gap = 2;
 const lowPoint = 33.3+gap;
 const highPoint = 66.6-gap;
+const Bithumb = require('./bithumb');
 
+const bithumb = new Bithumb();
 var inputRSI = {
   values:[],
   period : 14
@@ -16,7 +18,12 @@ var inputRSI = {
 
 async function call(){
   console.log('call in')
-
+  var result = await bithumb.xcoinApiCall('/info/order_detail', {
+    order_currency:'ETH',
+    order_id:'C0102000000163863611',
+  });
+  console.log('result',result);
+  return;
   const requestOptions2 = {
     method: 'GET',
     uri: 'https://api.bithumb.com/public/orderbook/ALL_KRW',
