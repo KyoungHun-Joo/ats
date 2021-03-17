@@ -1,11 +1,10 @@
-const API_KEY = require('./config')();
+const CONFIG = require('./config')();
 const rp = require('request-promise');
-
 
 function XCoinAPI(){
 	this.apiUrl = 'https://api.bithumb.com';
-	this.api_key = API_KEY[1];
-	this.api_secret = API_KEY[2];
+	this.api_key = CONFIG.BITHUMB_KEY;
+	this.api_secret = CONFIG.BITHUMB_SECRET;
 }
 
 XCoinAPI.prototype.xcoinApiCall = async function(endPoint, params) {

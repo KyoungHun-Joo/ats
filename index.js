@@ -1,18 +1,19 @@
 process.env.TZ = 'Asia/Seoul'
 
 const rp = require('request-promise');
-const api = "/v2/cryptocurrency/quotes/latest";
-const API_KEY = require('./config')();
+const rsiCompare1 = require('./strategy/rsiCompare1')
+
 const mysql_dbc = require('./db_con')();
 const Bithumb = require('./bithumb');
 const AWS = require('aws-sdk');
 const mailService = require('./email');
+const CONFIG = require('./config')();
 
 const bithumb = new Bithumb();
 const RSI = require('technicalindicators').RSI;
 const gap = 0;
-const lowPoint   = 29.3+gap;
-const highPoint  = 66.6-gap;
+const lowPoint   = CONFIG.LOW_POINT +gap;
+const highPoint  = CONFIG.HIGH_POINT-gap;
 var connection;
 const minLambda = true;
 const priceTable = "price2";
@@ -72,9 +73,6 @@ async function buy(type,amount,coinPrice,test=false,slug="ETH"){
 
   var lockAmount = Math.floor((amount/coinPrice)*1000)/1000;
   amount -= lockAmount*coinPrice;
-
-  const [data, fields] = await connection.execute("SELECT status FROM variable where `type` = '"+type+"' AND `slug`='"+slug+"' AND status IN (2,4) ");
-  if(data[0].status==2 || data[0].status==4) return;
 
   if(amount<0) amount = 0;
   if(test){
@@ -147,10 +145,10 @@ async function compareRSI1(connection, rsiArr,lastRSI,coinPrice,slug){
 
   //매수전
   if(status == 3){
-    if(lastRSI<=lowPoint)await buy(type,money,coinPrice,false,slug)
+    if(await rsiCompare1(1,lastRSI)) await buy(type,money,coinPrice,false,slug)
   //매도전
   }else if(status == 4){
-    if(lastRSI>=highPoint) await sell(type,lockAmount,coinPrice,false,slug)
+    if(await rsiCompare1(2,lastRSI)) await sell(type,lockAmount,coinPrice,false,slug)
   }
 }
 
@@ -161,11 +159,11 @@ async function compareRSI2(connection, rsiArr,lastRSI,coinPrice,slug){
   }else{
     var type = 'money2'
   }
-  const [data, fields] = await connection.execute("SELECT value,lockAmount,status FROM variable where `key` = '"+type+"'");
+  const [data, fields] = await connection.execute("SELECT value,lockAmount,status,slug FROM variable where `key` = '"+type+"'");
   var money = data[0].value;
   var lockAmount = data[0].lockAmount;
   var status = data[0].status;
-
+  
   const compareRSI = rsiArr.slice(-20);
 
   var turnToHigh = false;
@@ -179,11 +177,11 @@ async function compareRSI2(connection, rsiArr,lastRSI,coinPrice,slug){
     beforeCompare = compareRSI[i-1];
     compare = compareRSI[i];
 
-    if(compare>lowPoint+2) turnToHigh = false;
+    if(compare>lowPoint) turnToHigh = false;
 
     if(beforeCompare2<lowPoint && beforeCompare<lowPoint && compare>beforeCompare) turnToHigh = true;
 
-    if(compare<highPoint-2) turnToLow = false;
+    if(compare<highPoint) turnToLow = false;
 
     if(beforeCompare2>highPoint && beforeCompare>highPoint && compare<beforeCompare) turnToLow = true;
 
@@ -193,9 +191,9 @@ async function compareRSI2(connection, rsiArr,lastRSI,coinPrice,slug){
     turnToHigh = true;
   }
 
-  if(lastRSI>85){
-    turnToLow = true;
-  }
+  // if(lastRSI>85){
+  //   turnToLow = true;
+  // }
   
 
   //매수전
@@ -209,15 +207,16 @@ async function compareRSI2(connection, rsiArr,lastRSI,coinPrice,slug){
 }
 
 //3시간 RSI 평균값으로 매수,매도 시점 계산
-async function compareRSI3(connection, rsiArr,lastRSI){
-  if(minLambda) return;
-    const [data, fields] = await connection.execute("SELECT value,lockAmount,status FROM variable where `key` = 'money3'");
+async function compareRSI3(connection, rsiArr,lastRSI,coinPrice,slug){
+  
+    const [data, fields] = await connection.execute("SELECT value,lockAmount,status,slug FROM variable where `key` = 'money3'");
     var money = data[0].value;
     var status = data[0].status;
 
     const compareRSI = rsiArr.slice(-12);
     var totalRSI = 0;
     var totalCnt = 0;
+    if(slug != data[0].slug) return;
 
     for(let i=0; i<compareRSI.length; i++){
       if(compareRSI[i]>0){
@@ -231,10 +230,10 @@ async function compareRSI3(connection, rsiArr,lastRSI){
 
     //매수전
     if(status==3 && lastRSI <= (avgRSI-avgGap)){
-      await buy('money3',money,coinPrice,true)
+      await buy('money3',money,coinPrice,true,slug)
     //매도전
     }else if(status==4 && lastRSI >= (avgRSI+avgGap)){
-      await sell('money3',money,coinPrice,true)
+      await sell('money3',money,coinPrice,true,slug)
     }
 }
 
@@ -290,7 +289,7 @@ async function checkOrder(){
         //구매완료
         if(result.data.type=='bid'){
           console.log('bid completed',trade_amount,leftValue,trade_fee)
-          var bidVal = Number(leftValue[0].value) - trade_amount;
+          var bidVal = Number(leftValue[0].value) - trade_amount + trade_fee;
           await connection.execute("UPDATE variable SET status = 4,value='"+bidVal+"',lockAmount = '"+trade_units+"' WHERE `key` = '"+data[i].type+"'");
         }else if(result.data.type=='ask'){
           console.log('ask completed',trade_amount,leftValue,trade_fee)
@@ -332,9 +331,6 @@ async function call(event, context, callback) {
     const requestOptions2 = {
       method: 'GET',
       uri: 'https://api.bithumb.com/public/orderbook/ALL_KRW',
-      headers: {
-        'X-CMC_PRO_API_KEY': API_KEY[0]
-      },
       qs: {
         'count': '1'
       },
@@ -343,8 +339,7 @@ async function call(event, context, callback) {
     };
 
     var cmc_key = getCmcKey();
-    //var response = await rp(requestOptions);
-    // var data = response.data[1027];
+
 
     var response = await rp(requestOptions2);
 
@@ -359,7 +354,7 @@ async function call(event, context, callback) {
           const coinKey = Object.keys(coinDatas)[i];
           const coinPrice = coinDatas[coinKey].bids[0].price
 
-          const ret1 = await connection.query("INSERT INTO "+priceTable+" (date_key, slug, price) VALUES ('"
+          await connection.query("INSERT INTO "+priceTable+" (date_key, slug, price) VALUES ('"
           +cmc_key+"',  '"+coinKey+"', '"+coinPrice+"')")
 
           const [priceData, fields] = await connection.execute("SELECT * FROM "+priceTable+" WHERE slug='"+coinKey+"' ORDER BY createdAt DESC LIMIT 1000");
@@ -367,12 +362,11 @@ async function call(event, context, callback) {
 
           for(let i=priceData.length-1; i>=0; i--){
             await inputRSI.values.push(priceData[i].price)
-            if(Number(priceData[i].date_key.toString().slice(-2))%15 == compareMin){
-              await inputRSI15.values.push(priceData[i].price);
-            }
+            if(Number(priceData[i].date_key.toString().slice(-2))%15 == compareMin)  await inputRSI15.values.push(priceData[i].price);
           }
-            const rsiRes = await RSI.calculate(inputRSI);
-            const rsiRes15 = await RSI.calculate(inputRSI15);
+
+          const rsiRes = await RSI.calculate(inputRSI);
+          const rsiRes15 = await RSI.calculate(inputRSI15);
 
           const lastRSI = rsiRes[rsiRes.length-1];
           const lastRSI15 = (rsiRes15[rsiRes15.length-1]>=0)?rsiRes15[rsiRes15.length-1]:0;
@@ -382,10 +376,10 @@ async function call(event, context, callback) {
             await connection.query("UPDATE "+priceTable+" SET rsi = "+lastRSI+", rsi15 = "+lastRSI15+" WHERE date_key = '"+cmc_key+"' AND slug='"+coinKey+"'");
             await compareRSI1(connection, rsiRes15,lastRSI15,coinPrice,coinKey);
             await compareRSI2(connection, rsiRes15,lastRSI15,coinPrice,coinKey);
+            await compareRSI3(connection, rsiRes15,lastRSI15,coinPrice,coinKey);
 
           }else{
             await connection.query("INSERT INTO log (text) VALUES ('no rsi"+lastRSI+"')");
-
           }
 
           await connection.release();
