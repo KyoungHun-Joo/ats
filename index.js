@@ -11,7 +11,7 @@ const mailService = require('./email');
 const bithumb = new Bithumb();
 const RSI = require('technicalindicators').RSI;
 const gap = 0;
-const lowPoint   = 33.3+gap;
+const lowPoint   = 29.3+gap;
 const highPoint  = 66.6-gap;
 var connection;
 const minLambda = true;
@@ -72,6 +72,9 @@ async function buy(type,amount,coinPrice,test=false,slug="ETH"){
 
   var lockAmount = Math.floor((amount/coinPrice)*1000)/1000;
   amount -= lockAmount*coinPrice;
+
+  const [data, fields] = await connection.execute("SELECT status FROM variable where `type` = '"+type+"' AND `slug`='"+slug+"' AND status IN (2,4) ");
+  if(data[0].status==2 || data[0].status==4) return;
 
   if(amount<0) amount = 0;
   if(test){
@@ -178,11 +181,11 @@ async function compareRSI2(connection, rsiArr,lastRSI,coinPrice,slug){
 
     if(compare>lowPoint+2) turnToHigh = false;
 
-    if(beforeCompare2<lowPoint && beforeCompare<lowPoint && compare>lowPoint) turnToHigh = true;
+    if(beforeCompare2<lowPoint && beforeCompare<lowPoint && compare>beforeCompare) turnToHigh = true;
 
     if(compare<highPoint-2) turnToLow = false;
 
-    if(beforeCompare2>highPoint && beforeCompare>highPoint && compare<highPoint) turnToLow = true;
+    if(beforeCompare2>highPoint && beforeCompare>highPoint && compare<beforeCompare) turnToLow = true;
 
   }
   //rsi 20 아래로 떨어지면 그냥 구매
@@ -193,7 +196,7 @@ async function compareRSI2(connection, rsiArr,lastRSI,coinPrice,slug){
   if(lastRSI>85){
     turnToLow = true;
   }
-  console.log('call '+type,beforeCompare2,beforeCompare,compare,lastRSI);
+  
 
   //매수전
   if(status==3 && turnToHigh){
@@ -287,7 +290,7 @@ async function checkOrder(){
         //구매완료
         if(result.data.type=='bid'){
           console.log('bid completed',trade_amount,leftValue,trade_fee)
-          var bidVal = Number(leftValue[0].value) - trade_amount - trade_fee;
+          var bidVal = Number(leftValue[0].value) - trade_amount;
           await connection.execute("UPDATE variable SET status = 4,value='"+bidVal+"',lockAmount = '"+trade_units+"' WHERE `key` = '"+data[i].type+"'");
         }else if(result.data.type=='ask'){
           console.log('ask completed',trade_amount,leftValue,trade_fee)
@@ -324,7 +327,7 @@ async function call(event, context, callback) {
   }
   try{
     checkOrder();
-    const coinArr = ['BTC','ETH','GRS','ONG','ADA','EOS'];
+    const coinArr = ['BTC','ETH','GRS','ONG','ADA','EOS','ORC'];
 
     const requestOptions2 = {
       method: 'GET',
