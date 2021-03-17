@@ -19,6 +19,7 @@ var inputRSI = {
 }
 
 async function call(){
+  connection = await mysql_dbc.init();
 
   const requestOptions2 = {
     method: 'GET',
@@ -30,7 +31,32 @@ async function call(){
     gzip: true
   };
   const coinArr = ['BTC','ETH','GRS','XEM','ONG','ADA','EOS'];
+  var response = await rp(requestOptions2);
 
+  if(response.status == "0000"){
+    var coinDatas = response.data;
+
+    for(let i=0;i<Object.keys(coinDatas).length;i++){
+      if(coinArr.includes(Object.keys(coinDatas)[i])){
+        inputRSI.values = [];
+
+        const coinKey = Object.keys(coinDatas)[i];
+
+        const [priceData, fields] = await connection.execute("SELECT * FROM price2 WHERE slug='"+coinKey+"' ORDER BY createdAt DESC LIMIT 50");
+
+        for(let i=priceData.length-1; i>=0; i--){
+          await inputRSI.values.push(priceData[i].price)
+        }
+
+        const rsiRes = await RSI.calculate(inputRSI);
+
+        console.log(rsiRes)
+        console.log(rsiRes.slice(-5))
+
+        await connection.release();
+      }
+    }
+  }
   console.log(await rsiCompare1(1,22));
   
 }

@@ -164,7 +164,7 @@ async function compareRSI2(connection, rsiArr,lastRSI,coinPrice,slug){
   var lockAmount = data[0].lockAmount;
   var status = data[0].status;
   
-  const compareRSI = rsiArr.slice(-20);
+  const compareRSI = rsiArr.slice(rsiArr.length-20);
 
   var turnToHigh = false;
   var turnToLow = false;
@@ -173,19 +173,22 @@ async function compareRSI2(connection, rsiArr,lastRSI,coinPrice,slug){
   var compare;
 
   for(let i=0; i<compareRSI.length; i++){
-    beforeCompare2 = compareRSI[i-2];
-    beforeCompare = compareRSI[i-1];
-    compare = compareRSI[i];
+    if(i>2){
+      beforeCompare2 = compareRSI[i-2];
+      beforeCompare = compareRSI[i-1];
+      compare = compareRSI[i];
 
-    if(compare>lowPoint) turnToHigh = false;
+      if(compare>lowPoint) turnToHigh = false;
 
-    if(beforeCompare2<lowPoint && beforeCompare<lowPoint && compare>beforeCompare) turnToHigh = true;
+      if(beforeCompare2<lowPoint && beforeCompare<lowPoint && lastRSI>beforeCompare) turnToHigh = true;
 
-    if(compare<highPoint) turnToLow = false;
+      if(compare<highPoint) turnToLow = false;
 
-    if(beforeCompare2>highPoint && beforeCompare>highPoint && compare<beforeCompare) turnToLow = true;
+      if(beforeCompare2>highPoint && beforeCompare>highPoint && lastRSI<beforeCompare) turnToLow = true;
+    }
 
   }
+  //console.log('compare2',beforeCompare2,beforeCompare,lastRSI);
   //rsi 20 아래로 떨어지면 그냥 구매
   if(lastRSI<17){
     turnToHigh = true;
