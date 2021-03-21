@@ -89,15 +89,8 @@ async function buy(type,amount,coinPrice,test=false,slug="ETH",platform="bithumb
 
   }else{
     if(platform=='upbit'){
-      var order_id = await upbit.trade(1,slug,coinPrice);
+      var order_id = await upbit.trade('bid',slug,coinPrice);
       console.log('order id',order_id)
-      if(order_id){
-        await connection.execute("UPDATE variable SET status=2, slug='"+slug+"',lastPrice = '"+coinPrice+"' WHERE `key` = '"+type+"'");
-
-        await connection.query("INSERT INTO trade_log (type, price, lockAmount, buysell,buysellPrice,order_id,slug) VALUES ('"
-        +type+"', '"+amount+"', 0, 1,'"+coinPrice+"','"+order_id+"','"+slug+"')")
-      }
-
     }else{
       var order_id = await bithumbCall('buy',coinPrice,lockAmount,slug);
     }
@@ -134,7 +127,14 @@ async function sell(type,lockAmount,coinPrice,test=false,slug="ETH",platform){
     +type+"', '"+value+"', '"+lockAmount+"',2,'"+coinPrice+"','','"+slug+"',1)")
 
   }else{
-    var order_id = await bithumbCall('sell',coinPrice,lockAmount,slug);
+    if(platform=='upbit'){
+      var order_id = await upbit.trade('ask',slug,coinPrice);
+      console.log('order id',order_id)
+
+    }else{
+      var order_id = await bithumbCall('sell',coinPrice,lockAmount,slug);
+    }
+
     if(order_id){
       await connection.execute("UPDATE variable SET status=1, lockAmount = 0 WHERE `key` = '"+type+"'");
 
