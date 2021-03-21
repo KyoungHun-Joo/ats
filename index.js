@@ -383,6 +383,8 @@ async function upbitTrade(connection){
   const [dbData, fields] = await connection.execute("SELECT value,lockAmount,status,slug,lastPrice FROM variable where `key` = 'upbitMoney1'");
   const valueStatus = dbData[0].status;
   const lastPrice = dbData[0].lastPrice;
+  const slug = dbData[0].slug;
+
   const type = "upbitMoney1"
   var inputRSI15 = {
     values:[],
@@ -407,8 +409,10 @@ async function upbitTrade(connection){
       if(await upbitCompare(1,lastRSI15,0,0)) await buy(type,0,priceData[0].trade_price,false,market,"upbit")
     }
 
-  }else{
-    if(await upbitCompare(2,0,lastPrice,priceData[0].trade_price)) await sell(type,lockAmount,coinPrice,false,slug,"upbit")
+  }else if(valueStatus == 4){
+    var coinPrice = await upbit.coinPrice(slug);
+
+    if(await upbitCompare(2,0,lastPrice,coinPrice)) await sell(type,lockAmount,coinPrice,false,slug,"upbit")
   }
 }
 

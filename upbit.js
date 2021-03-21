@@ -112,6 +112,11 @@ UpbitAPI.prototype.useCoinInfo = async function(connection,minutes=1,count=200){
 UpbitAPI.prototype.coinInfo = async function(minutes,market,count){
   return await this.request("/v1/candles/minutes/"+minutes,{market:market,count:count},"GET");
 }
+
+UpbitAPI.prototype.coinPrice = async function(market){
+  var coin =  await this.coinInfo(1,data[i].market,1);
+  return coin[0].trade_price;
+}
 UpbitAPI.prototype.marketInfo = async function(){
 
   const body = {
