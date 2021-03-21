@@ -412,7 +412,7 @@ async function upbitTrade(connection){
 
 async function call(event, context, callback) {
   //mailService('test')
-
+  const cmc_key = getCmcKey();
   connection = await mysql_dbc.init();
 
 
@@ -470,3 +470,5 @@ async function recall(){
 }
 
 exports.handler = call;
+
+call();
