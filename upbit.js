@@ -90,7 +90,7 @@ UpbitAPI.prototype.useCoinInfo = async function(connection,minutes=1,count=200){
 
 	try{
 		for(let i=data.length-1; i>=0; i--){
-			var result = await this.coinInfo(data[i].market,count);
+			var result = await this.coinInfo(minutes,data[i].market,count);
       console.log('result',result)
 			market.push({market:data[i].market,data:result});
 
@@ -109,7 +109,7 @@ UpbitAPI.prototype.useCoinInfo = async function(connection,minutes=1,count=200){
 	//const options = {method: 'GET', qs: {market: 'KRW-BTC,KRW-IQ', count: '1'}};
 }
 
-UpbitAPI.prototype.coinInfo = async function(market,count){
+UpbitAPI.prototype.coinInfo = async function(minutes,market,count){
   return await this.request("/v1/candles/minutes/"+minutes,{market:market,count:count},"GET");
 }
 UpbitAPI.prototype.marketInfo = async function(){
