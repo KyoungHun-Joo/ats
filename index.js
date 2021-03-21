@@ -75,8 +75,11 @@ async function bithumbCall(type,coinPrice,unit,slug){
 }
 
 async function buy(type,amount,coinPrice,test=false,slug="ETH",platform="bithumb"){
-
-  var lockAmount = Math.floor((amount/coinPrice)*1000)/1000;
+  if(platform == "upbit"){
+    var lockAmount = Math.floor((amount/coinPrice)*10000)/10000;
+  }else{
+    var lockAmount = Math.floor((amount/coinPrice)*1000)/1000;
+  }
   amount -= lockAmount*coinPrice;
 
   if(amount<0) amount = 0;
