@@ -381,8 +381,9 @@ async function bitumbTrade(){
 
 async function upbitTrade(connection){
   const [dbData, fields] = await connection.execute("SELECT value,lockAmount,status,slug,lastPrice FROM variable where `key` = 'upbitMoney1'");
-  const valueStatus = dbData[0].status
-  const lastPrice = dbData[0].lastPrice
+  const valueStatus = dbData[0].status;
+  const lastPrice = dbData[0].lastPrice;
+  const type = "upbitMoney1"
   var inputRSI15 = {
     values:[],
     period : 14
