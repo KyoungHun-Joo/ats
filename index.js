@@ -383,6 +383,10 @@ async function upbitTrade(connection){
   const [dbData, fields] = await connection.execute("SELECT value,lockAmount,status,slug,lastPrice FROM variable where `key` = 'upbitMoney1'");
   const valueStatus = dbData[0].status
   const lastPrice = dbData[0].lastPrice
+  var inputRSI15 = {
+    values:[],
+    period : 14
+  }
 
   if(valueStatus == 3){
     const upbitData = await upbit.useCoinInfo(connection,30,200);
