@@ -47,6 +47,17 @@ function UpbitAPI(){
 	this.api_secret = CONFIG.UPBIT_OPEN_API_SECRET_KEY;
 }
 
+UpbitAPI.prototype.orderInfo = async function(uuid){
+
+  const body = {
+    uuid: uuid
+  }
+
+  var result = await this.request("/v1/order",body,"GET");
+  console.log('result',result)
+  return result;
+}
+
 UpbitAPI.prototype.upbitCoinSet = async function(connection){
 
   var upRes = await this.marketInfo();
@@ -71,15 +82,27 @@ UpbitAPI.prototype.minInfo = async function(params){
 }
 
 UpbitAPI.prototype.trade = async function(tradeType,market,price=null,volume=null){
+  price = Number(price);
+  if(price<=1000){
+    price = Math.floor(price/10)*10;
+  }else if(price<=500000){
+    price = Math.floor(price/100)*100;
+  }else if(price<=2000000){
+    price = Math.floor(price/1000)*1000;
+  }else if(price>2000000){
+    price = Math.floor(price/1000)*1000;
+  }
   const body = {
       market: market,
       side: tradeType,
-      volume: volume,
+      volume: Number(volume),
       price: price,
-      ord_type: 'price',
+      ord_type: 'limit',
   }
-console.log(body)
-  return await this.request("/v1/orders",body,"POST");
+
+  var result = await this.request("/v1/orders",body,"POST");
+
+  return result.uuid;
 
 }
 UpbitAPI.prototype.useCoinInfo = async function(connection,minutes=1,count=200){
@@ -113,7 +136,7 @@ UpbitAPI.prototype.coinInfo = async function(minutes,market,count){
 }
 
 UpbitAPI.prototype.coinPrice = async function(market){
-  var coin =  await this.coinInfo(1,data[i].market,1);
+  var coin = await this.coinInfo(1,market,1);
   return coin[0].trade_price;
 }
 UpbitAPI.prototype.marketInfo = async function(){
@@ -157,7 +180,6 @@ UpbitAPI.prototype.request = async function(apiUrl,body,type,qs={}){
 			options = {
 				method: "POST",
 				url: server_url + apiUrl,
-				qs:qs,
 				headers: {Authorization: `Bearer ${token}`},
 				json: body
 			}
