@@ -84,7 +84,7 @@ async function buy(type,amount,coinPrice,test=false,slug="ETH",platform="bithumb
 
     await connection.execute("UPDATE variable SET status=4, slug='"+slug+"' WHERE `key` = '"+type+"'");
 
-    await connection.query("INSERT INTO trade_log (type, price, lockAmount, buysell,buysellPrice,order_id,slug,status) VALUES ('"
+    await connection.query("INSERT INTO trade_log (type, price, lockAmount, buysell,buysellPrice,order_id,slug,status,lastPrice) VALUES ('"
     +type+"', '"+amount+"', '"+lockAmount+"', 4,'"+coinPrice+"','','"+slug+"',1)")
 
   }else{
@@ -92,7 +92,7 @@ async function buy(type,amount,coinPrice,test=false,slug="ETH",platform="bithumb
       var order_id = await upbit.trade(1,slug,coinPrice);
       console.log('order id',order_id)
       if(order_id){
-        await connection.execute("UPDATE variable SET status=2, slug='"+slug+"' WHERE `key` = '"+type+"'");
+        await connection.execute("UPDATE variable SET status=2, slug='"+slug+"',lastPrice = '"+coinPrice+"' WHERE `key` = '"+type+"'");
 
         await connection.query("INSERT INTO trade_log (type, price, lockAmount, buysell,buysellPrice,order_id,slug) VALUES ('"
         +type+"', '"+amount+"', 0, 1,'"+coinPrice+"','"+order_id+"','"+slug+"')")
