@@ -414,6 +414,31 @@ async function upbitTrade(connection){
 
 async function call(event, context, callback) {
   //mailService('test')
+  const options = {
+    method: 'GET',
+    hostname: 'jsonip.com',
+};
+
+const req = http.request(options, (res) => {
+    const chunks = [];
+
+    res.on('data', (chunk) => chunks.push(chunk));
+
+    res.on('end', () => {
+        const body = Buffer.concat(chunks);
+        const results = body.toString();
+
+        console.log(results);
+
+        callback(null, {
+            statusCode: 200,
+            body: results,
+        });
+    });
+});
+
+req.end();
+return;
   const cmc_key = getCmcKey();
   connection = await mysql_dbc.init();
 
