@@ -408,7 +408,7 @@ async function upbitTrade(connection){
     }
 
   }else{
-    if(await upbitCompare(2,lastRSI15,lastPrice,priceData[0].trade_price)) await sell(type,lockAmount,coinPrice,false,slug,"upbit")
+    if(await upbitCompare(2,0,lastPrice,priceData[0].trade_price)) await sell(type,lockAmount,coinPrice,false,slug,"upbit")
   }
 }
 
