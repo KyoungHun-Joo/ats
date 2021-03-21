@@ -89,7 +89,7 @@ async function buy(type,amount,coinPrice,test=false,slug="ETH",platform="bithumb
 
   }else{
     if(platform=='upbit'){
-      var order_id = await upbit.trade('bid',slug,coinPrice);
+      var order_id = await upbit.trade('bid',slug,coinPrice,lockAmount);
       console.log('order id',order_id)
     }else{
       var order_id = await bithumbCall('buy',coinPrice,lockAmount,slug);
