@@ -380,34 +380,34 @@ async function bitumbTrade(){
 }
 
 async function upbitTrade(connection){
-  const [dbData, fields] = await connection.execute("SELECT value,lockAmount,status,slug FROM variable where `key` = 'upbitMoney1'");
+  const [dbData, fields] = await connection.execute("SELECT value,lockAmount,status,slug,lastPrice FROM variable where `key` = 'upbitMoney1'");
   const valueStatus = dbData[0].status
+  const lastPrice = dbData[0].lastPrice
   var market = await upbit.marketInfo();
 
   const rsiRes = await RSI.calculate(inputRSI);
 
-  const upbitData = await upbit.useCoinInfo(connection,30,200);
-  for(let i=0; i<upbitData.length; i++){
+  if(valueStatus == 3){
+    const upbitData = await upbit.useCoinInfo(connection,30,200);
 
-    inputRSI15.values = [];
-    const market = upbitData[i].market;
-    const priceData = upbitData[i].data;
+    for(let i=0; i<upbitData.length; i++){
 
-    for(let j=priceData.length-1; j>=0; j--){
-      await inputRSI15.values.push(priceData[j].trade_price)
-    }
-    const rsiRes15 = await RSI.calculate(inputRSI15);
-    const lastRSI15 = (rsiRes15[rsiRes15.length-1]>=0)?rsiRes15[rsiRes15.length-1]:0;
+      inputRSI15.values = [];
+      const market = upbitData[i].market;
+      const priceData = upbitData[i].data;
 
-    //매수전
-    if(valueStatus == 3){
+      for(let j=priceData.length-1; j>=0; j--){
+        await inputRSI15.values.push(priceData[j].trade_price)
+      }
+      const rsiRes15 = await RSI.calculate(inputRSI15);
+      const lastRSI15 = (rsiRes15[rsiRes15.length-1]>=0)?rsiRes15[rsiRes15.length-1]:0;
+      console.log(slug,lastRSI15)
       if(await upbitCompare(1,lastRSI15,0,0)) await buy(type,0,priceData[0].trade_price,false,slug,"upbit")
-    //매도전
-    }else if(valueStatus == 4){
-      if(await upbitCompare(2,lastRSI15,lastPrice,priceData[0].trade_price)) await sell(type,lockAmount,coinPrice,false,slug,"upbit")
     }
-  }
 
+  }else{
+    if(await upbitCompare(2,lastRSI15,lastPrice,priceData[0].trade_price)) await sell(type,lockAmount,coinPrice,false,slug,"upbit")
+  }
 }
 
 async function call(event, context, callback) {
@@ -428,10 +428,8 @@ async function call(event, context, callback) {
   try{
     //await checkOrder();
     //await bitumbTrade();
-    //await upbitTrade();
+    await upbitTrade();
 
-    var test = await upbit.useCoinInfo(connection);
-    console.log('test',test)
     await connection.release();
 
     return  { 'statusCode': 200,
