@@ -428,7 +428,7 @@ async function call(event, context, callback) {
   try{
     //await checkOrder();
     //await bitumbTrade();
-    await upbitTrade();
+    await upbitTrade(connection);
 
     await connection.release();
 
