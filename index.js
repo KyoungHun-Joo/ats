@@ -402,8 +402,8 @@ async function upbitTrade(connection){
       }
       const rsiRes15 = await RSI.calculate(inputRSI15);
       const lastRSI15 = (rsiRes15[rsiRes15.length-1]>=0)?rsiRes15[rsiRes15.length-1]:0;
-      console.log(slug,lastRSI15)
-      if(await upbitCompare(1,lastRSI15,0,0)) await buy(type,0,priceData[0].trade_price,false,slug,"upbit")
+      console.log(market,lastRSI15)
+      if(await upbitCompare(1,lastRSI15,0,0)) await buy(type,0,priceData[0].trade_price,false,market,"upbit")
     }
 
   }else{

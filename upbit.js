@@ -156,9 +156,7 @@ UpbitAPI.prototype.request = async function(apiUrl,body,type,qs={}){
 			}
 
 		}
-    console.log('rp before')
 		result = await rp(options);
-    console.log('options',result)
 
 	}catch(e){
     console.log('err',e)
