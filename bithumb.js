@@ -7,6 +7,23 @@ function XCoinAPI(){
 	this.api_secret = CONFIG.BITHUMB_SECRET;
 }
 
+XCoinAPI.prototype.orderBook = async function(endPoint, params) {
+	const coinArr = ['BTC','ETH','GRS','ONG','ADA','EOS','ORC'];
+
+	const requestOptions2 = {
+		method: 'GET',
+		uri: 'https://api.bithumb.com/public/orderbook/ALL_KRW',
+		qs: {
+			'count': '1'
+		},
+		json: true,
+		gzip: true
+	};
+
+
+	return await rp(requestOptions2);
+}
+
 XCoinAPI.prototype.xcoinApiCall = async function(endPoint, params) {
 	var rgParams = {
 		'endPoint' : endPoint
@@ -88,9 +105,9 @@ function http_build_query(obj) {
 			}else{
 				var value = encodeURIComponent(obj[val].replace(/[!'()*]/g, escape));
 			}
-			
+
 			output_string.push(key + '=' + value)
-		
+
 	})
 
 	return output_string.join('&');

@@ -7,16 +7,57 @@ const querystring = require("querystring");
 const fetch = require('node-fetch');
 
 const sign = require('jsonwebtoken').sign
+const queryEncode = require("querystring").encode
+
 const access_key = CONFIG.UPBIT_OPEN_API_ACCESS_KEY
 const secret_key = CONFIG.UPBIT_OPEN_API_SECRET_KEY
-const server_url = CONFIG.UPBIT_OPEN_API_SERVER_URL
 
-const url = 'https://api.upbit.com/v1/candles/minutes/1';
+const server_url = 'https://api.upbit.com'
+
+function numberPad(n) {
+    n = n + '';
+    return n.length >= 2 ? n : '0' + n;
+}
+
+function getCmcKey(){
+  var year = new Date().getFullYear() ;
+  var month = numberPad(new Date().getMonth()+1);
+  var day = numberPad(new Date().getDate());
+  var hour = numberPad(new Date().getHours());
+  var min = numberPad(new Date().getMinutes());
+
+  var period = 1;
+
+  if(min < 15){
+  }else if(min < 30){
+    period = 2;
+  }else if(min < 45){
+    period = 3;
+  }else if(min < 60){
+    period = 4;
+  }
+  var cmc_key = year+month+day+hour+min;
+
+  return cmc_key;
+}
 
 function UpbitAPI(){
 	this.apiUrl = 'https://api.bithumb.com';
-	this.api_key = CONFIG.BITHUMB_KEY;
-	this.api_secret = CONFIG.BITHUMB_SECRET;
+	this.api_key = CONFIG.UPBIT_OPEN_API_ACCESS_KEY;
+	this.api_secret = CONFIG.UPBIT_OPEN_API_SECRET_KEY;
+}
+
+UpbitAPI.prototype.upbitCoinSet = async function(connection){
+
+  var upRes = await this.marketInfo();
+  var insertQuery = "INSERT INTO upbit_coin(market,name) VALUES "
+  for(let i=0;i<upRes.length;i++){
+    if(upRes[i].market.indexOf("KRW-")>-1){
+      insertQuery += "('"+upRes[i].market+"','"+upRes[i].korean_name+"'),";
+    }
+  }
+  insertQuery = insertQuery.slice(0,-1)
+  var result = await connection.execute(insertQuery);
 }
 
 UpbitAPI.prototype.minInfo = async function(params){
@@ -27,78 +68,106 @@ UpbitAPI.prototype.minInfo = async function(params){
     .then(res => res.json())
     .then(json => console.log(json))
     .catch(err => console.error('error:' + err));
-    
 }
 
-UpbitAPI.prototype.buy = async function(params){
+UpbitAPI.prototype.trade = async function(tradeType,market,price=null,volume=null){
 
   const body = {
-      market: 'KRW-BTC',
-      side: 'bid',
-      volume: '0.01',
-      price: '100',
-      ord_type: 'limit',
+      market: market,
+      side: tradeType,
+      volume: volume,
+      price: price,
+      ord_type: 'price',
   }
 
   return await this.request("/v1/orders",body,"POST");
 
 }
+UpbitAPI.prototype.useCoinInfo = async function(connection,minutes=1,count=200){
+	var cmc_key = getCmcKey();
+	const [data, fields] = await connection.execute("SELECT market FROM upbit_coin WHERE useStatus = 1");
+	var market = []
 
-UpbitAPI.prototype.info = async function(params){
+	try{
+		for(let i=data.length-1; i>=0; i--){
+			var result = await this.request("/v1/candles/minutes/"+minutes,{market:data[i].market,count:count},"GET");
+      console.log('result',result)
+			market.push({market:data[i].market,data:result});
 
-  const body = {
-      market: 'KRW-BTC'
-  }
+			for(let j=0; j<result.length; j++){
 
-  return await this.request("/v1/orders/chance",body,"GET");
+				await connection.query("INSERT INTO upbit_min_price (cmc_key, market, opening_price,high_price,low_price,trade_price,acc_trade_price,acc_trade_volume) VALUES ('"
+				+cmc_key+"','"+data[i].market+"','"+Number(result[j].opening_price)+"','"+Number(result[j].high_price)+"','"+Number(result[j].low_price)+"','"+Number(result[j].trade_price)+"','"+Number(result[j].candle_acc_trade_price)+"','"+Number(result[j].candle_acc_trade_volume)+"')")
+			}
+		}
+		return market;
+	}catch(e){
+		console.log('e',e.message);
+		return e.message;
+	}
+
+	//const options = {method: 'GET', qs: {market: 'KRW-BTC,KRW-IQ', count: '1'}};
 }
 
-UpbitAPI.prototype.request = async function(apiUrl,body,type){
+UpbitAPI.prototype.marketInfo = async function(){
+
+  const body = {
+  }
+	const options = {method: 'GET'};
+
+  return await this.request("/v1/market/all",body,"GET",{isDetails: 'false'});
+}
+
+
+UpbitAPI.prototype.request = async function(apiUrl,body,type,qs={}){
   var result;
   var options;
-  const query = queryEncode(body)
 
-  const hash = crypto.createHash('sha512')
+	try{
+		const query = queryEncode(body)
+		const hash = crypto.createHash('sha512')
+		const queryHash = hash.update(query, 'utf-8').digest('hex')
+		const payload = {
+				access_key: access_key,
+				nonce: uuidv4(),
+				query_hash: queryHash,
+				query_hash_alg: 'SHA512',
+		}
 
-  const query = queryEncode(body)
-  const queryHash = hash.update(query, 'utf-8').digest('hex')
+		const token = sign(payload, secret_key)
 
-  const payload = {
-      access_key: access_key,
-      nonce: uuidv4(),
-      query_hash: queryHash,
-      query_hash_alg: 'SHA512',
-  }
+		if(type=="GET"){
+			options = {
+				method: "GET",
+				url: server_url + apiUrl+"?" + query,
+				qs:qs,
+				headers: {Authorization: `Bearer ${token}`},
+				json: body
+			}
 
-  const token = sign(payload, secret_key)
-  if(type=="GET"){
-    options = {
-      method: "GET",
-      url: server_url + apiUrl+"?" + query,
-      headers: {Authorization: `Bearer ${token}`},
-      json: body
-    }
+		}else{
 
-  }else{
+			options = {
+				method: "POST",
+				url: server_url + apiUrl,
+				qs:qs,
+				headers: {Authorization: `Bearer ${token}`},
+				json: body
+			}
 
-    options = {
-      method: "POST",
-      url: server_url + apiUrl,
-      headers: {Authorization: `Bearer ${token}`},
-      json: body
-    }
+		}
+    console.log('rp before')
+		result = await rp(options);
+    console.log('options',result)
 
-  }
-
-  try{
-    result = await rp();
-  }catch(e){
-    result = e.message
-  }
+	}catch(e){
+    console.log('err',e)
+		result = e.message;
+	}
 
   return result;
 }
 
 
 
-module.exports = XCoinAPI;
+module.exports = UpbitAPI;
