@@ -442,7 +442,7 @@ async function call(event, context, callback) {
       },
     'body':  e.message };
   }
-
+  process.exit(1);
 }
 
 async function recall(){
