@@ -71,15 +71,25 @@ UpbitAPI.prototype.minInfo = async function(params){
 }
 
 UpbitAPI.prototype.trade = async function(tradeType,market,price=null,volume=null){
-
-  const body = {
+  var body;
+  if(tradeType =="bid"){
+    body = {
+      market: market,
+      side: tradeType,
+      price: price,
+      ord_type: 'price',
+    }
+  }else if(tradeType=="ask"){
+    body = {
       market: market,
       side: tradeType,
       volume: volume,
       price: price,
       ord_type: 'price',
+    }
   }
-console.log(body)
+  console.log(body)
+
   return await this.request("/v1/orders",body,"POST");
 
 }
