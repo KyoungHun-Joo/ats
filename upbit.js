@@ -79,7 +79,7 @@ UpbitAPI.prototype.trade = async function(tradeType,market,price=null,volume=nul
       price: price,
       ord_type: 'price',
   }
-
+console.log(body)
   return await this.request("/v1/orders",body,"POST");
 
 }
