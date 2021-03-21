@@ -54,7 +54,6 @@ UpbitAPI.prototype.orderInfo = async function(uuid){
   }
 
   var result = await this.request("/v1/order",body,"GET");
-  console.log('result',result)
   return result;
 }
 

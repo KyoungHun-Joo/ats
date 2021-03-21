@@ -100,7 +100,7 @@ async function buy(type,amount,coinPrice,test=false,slug="ETH",platform="bithumb
     }
 
     if(order_id){
-      await connection.execute("UPDATE variable SET value='"+amount+"',status=2, slug='"+slug+"' WHERE `key` = '"+type+"'");
+      await connection.execute("UPDATE variable SET status=2, slug='"+slug+"' WHERE `key` = '"+type+"'");
 
       await connection.query("INSERT INTO trade_log (type, price, lockAmount, buysell,buysellPrice,order_id,slug) VALUES ('"
       +type+"', '"+amount+"', 0, 1,'"+coinPrice+"','"+order_id+"','"+slug+"')")
@@ -295,7 +295,6 @@ async function checkOrder(){
 
       if(data[i].type=='upbitMoney'){
         var result = await upbit.orderInfo(data[i].order_id);
-        console.log('order result',result)
         if(result.state=="done"){
           const [leftValue, fileds] = await connection.execute("SELECT value FROM variable WHERE `key` = '"+data[i].type+"' ");
           var trade_fee =0;
@@ -443,7 +442,6 @@ async function upbitTrade(connection){
       }
       const rsiRes15 = await RSI.calculate(inputRSI15);
       const lastRSI15 = (rsiRes15[rsiRes15.length-1]>=0)?rsiRes15[rsiRes15.length-1]:0;
-      console.log(market,lastRSI15)
       if(await upbitCompare(1,lastRSI15,0,0)) await buy(type,value,priceData[0].trade_price,false,market,"upbit")
     }
 
