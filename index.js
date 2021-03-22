@@ -311,7 +311,7 @@ async function checkOrder(){
           //구매완료
           if(result.side=='bid'){
             console.log('bid completed',trade_amount,leftValue,trade_fee)
-            var bidVal = Number(leftValue[0].value) ;
+            var bidVal = Number(leftValue[0].value)-trade_amount-trade_fee ;
             await connection.execute("UPDATE variable SET status = 4,value='"+bidVal+"',lockAmount = '"+trade_units+"',lastPrice = '"+result.price+"' WHERE `key` = '"+data[i].type+"'");
           }else if(result.side=='ask'){
             console.log('ask completed',trade_amount,leftValue,trade_fee)
