@@ -112,13 +112,12 @@ UpbitAPI.prototype.useCoinInfo = async function(connection,minutes=1,count=200){
 	try{
 		for(let i=data.length-1; i>=0; i--){
 			var result = await this.coinInfo(minutes,data[i].market,count);
-      console.log('result',result)
 			market.push({market:data[i].market,data:result});
 
 			for(let j=0; j<result.length; j++){
 
-				await connection.query("INSERT INTO upbit_min_price (cmc_key, market, opening_price,high_price,low_price,trade_price,acc_trade_price,acc_trade_volume) VALUES ('"
-				+cmc_key+"','"+data[i].market+"','"+Number(result[j].opening_price)+"','"+Number(result[j].high_price)+"','"+Number(result[j].low_price)+"','"+Number(result[j].trade_price)+"','"+Number(result[j].candle_acc_trade_price)+"','"+Number(result[j].candle_acc_trade_volume)+"')")
+				//await connection.query("INSERT INTO upbit_min_price (cmc_key, market, opening_price,high_price,low_price,trade_price,acc_trade_price,acc_trade_volume) VALUES ('"
+				//+cmc_key+"','"+data[i].market+"','"+Number(result[j].opening_price)+"','"+Number(result[j].high_price)+"','"+Number(result[j].low_price)+"','"+Number(result[j].trade_price)+"','"+Number(result[j].candle_acc_trade_price)+"','"+Number(result[j].candle_acc_trade_volume)+"')")
 			}
 		}
 		return market;
