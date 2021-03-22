@@ -11,8 +11,6 @@ async function strategy(connection, priceArr, term=60){
   var hour = numberPad(new Date().getHours());
   var min = numberPad(new Date().getMinutes());
 
-  test(priceArr);
-  return;
   var [data, fields] = await connection.execute("SELECT value,lockAmount FROM variable where `key` = 'volatility'");
   data = data[0];
 
