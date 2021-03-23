@@ -91,6 +91,7 @@ UpbitAPI.prototype.trade = async function(tradeType,market,price=null,volume=nul
   }else if(price>=2000000){
     price = Math.floor(price/1000)*1000;
   }
+  
   const body = {
       market: market,
       side: tradeType,
@@ -98,7 +99,7 @@ UpbitAPI.prototype.trade = async function(tradeType,market,price=null,volume=nul
       price: price,
       ord_type: 'limit',
   }
-
+  console.log('body',body)
   var result = await this.request("/v1/orders",body,"POST");
 
   return result.uuid;
