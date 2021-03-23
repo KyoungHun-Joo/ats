@@ -295,6 +295,7 @@ async function checkOrder(){
 
       if(data[i].type=='upbitMoney'){
         var result = await upbit.orderInfo(data[i].order_id);
+        console.log('orderInfo',result)
         if(result.state=="done"){
           const [leftValue, fileds] = await connection.execute("SELECT value FROM variable WHERE `key` = '"+data[i].type+"' ");
           var trade_fee =0;
@@ -370,7 +371,7 @@ async function bitumbTrade(){
   var cmc_key = getCmcKey();
 
   var response = await bithumb.orderBook();
-
+  
   if(response.status == "0000"){
     var coinDatas = response.data;
 

@@ -82,14 +82,13 @@ UpbitAPI.prototype.minInfo = async function(params){
 
 UpbitAPI.prototype.trade = async function(tradeType,market,price=null,volume=null){
   price = Number(price);
-  if(price<=100){
-  }else if(price<=1000){
+  if(price>=100){
+    price = Math.floor(price);
+  }else if(price>=1000){
     price = Math.floor(price/10)*10;
-  }else if(price<=500000){
+  }else if(price>=500000){
     price = Math.floor(price/100)*100;
-  }else if(price<=2000000){
-    price = Math.floor(price/1000)*1000;
-  }else if(price>2000000){
+  }else if(price>=2000000){
     price = Math.floor(price/1000)*1000;
   }
   const body = {
@@ -117,7 +116,7 @@ UpbitAPI.prototype.useCoinInfo = async function(connection,minutes=1,count=200){
 
 			//await connection.query("INSERT INTO upbit_min_price (cmc_key, market, opening_price,high_price,low_price,trade_price,acc_trade_price,acc_trade_volume) VALUES ('"
 			//+cmc_key+"','"+data[i].market+"','"+Number(result[result.length-1].opening_price)+"','"+Number(result[result.length-1].high_price)+"','"+Number(result[result.length-1].low_price)+"','"+Number(result[result.length-1].trade_price)+"','"+Number(result[result.length-1].candle_acc_trade_price)+"','"+Number(result[result.length-1].candle_acc_trade_volume)+"')")
-
+			
 		}
 		return market;
 	}catch(e){
