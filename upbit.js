@@ -115,11 +115,12 @@ UpbitAPI.prototype.useCoinInfo = async function(connection,minutes=1,count=200){
 	var market = []
 
 	try{
+    console.log('test0',data[0])
 		for(let i=data.length-1; i>=0; i--){
 			var result = await this.coinInfo(minutes,data[i].market,count);
 			market.push({market:data[i].market,data:result});
     }
-    
+    console.log('test1',result)
     await connection.query("INSERT INTO upbit_min_price (cmc_key, market, opening_price,high_price,low_price,trade_price,acc_trade_price,acc_trade_volume) VALUES ('"
 			+cmc_key+"','"+data[i].market+"','"+Number(result.opening_price)+"','"+Number(result.high_price)+"','"+Number(result.low_price)+"','"+Number(result.trade_price)+"','"+Number(result.candle_acc_trade_price)+"','"+Number(result.candle_acc_trade_volume)+"')")
 		return market;
