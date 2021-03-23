@@ -433,6 +433,7 @@ async function upbitTrade(connection){
   }
 
   if(valueStatus == 3){
+    var buyFlag = false;
     const upbitData = await upbit.useCoinInfo(connection,30,200);
 
     for(let i=0; i<upbitData.length; i++){
@@ -446,8 +447,12 @@ async function upbitTrade(connection){
       }
       const rsiRes15 = await RSI.calculate(inputRSI15);
       const lastRSI15 = (rsiRes15[rsiRes15.length-1]>=0)?rsiRes15[rsiRes15.length-1]:0;
-      console.log('market',market,lastRSI15,priceData[0].trade_price)
-      if(await upbitCompare(1,lastRSI15,0,0)) await buy(type,value,priceData[0].trade_price,false,market,"upbit")
+      
+      if(await upbitCompare(1,lastRSI15,0,0) && !buyFlag){
+        console.log('market',market,lastRSI15,priceData[0].trade_price)
+        buyFlag = true;
+        await buy(type,value,priceData[0].trade_price,false,market,"upbit")
+      } 
     }
 
   }else if(valueStatus == 4){
