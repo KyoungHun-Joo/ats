@@ -82,13 +82,17 @@ UpbitAPI.prototype.minInfo = async function(params){
 
 UpbitAPI.prototype.trade = async function(tradeType,market,price=null,volume=null){
   price = Number(price);
-  if(price>=100){
+  if(0<=price && price<1000){
     price = Math.floor(price);
-  }else if(price>=1000){
+  }else if(1000<=price && price<100000){
     price = Math.floor(price/10)*10;
-  }else if(price>=500000){
+  }else if(100000<=price && price<500000){
+    price = Math.floor(price/50)*50;
+  }else if(500000<=price && price<1000000){
     price = Math.floor(price/100)*100;
-  }else if(price>=2000000){
+  }else if(1000000<=price && price<2000000){
+    price = Math.floor(price/500)*500;
+  }else if(2000000<=price){
     price = Math.floor(price/1000)*1000;
   }
   
