@@ -321,6 +321,9 @@ async function checkOrder(){
             await connection.execute("UPDATE variable SET status = 3,value = value + '"+trade_amount+"' WHERE `key` = '"+data[i].type+"'");
           }
 
+        }else if(result.state=="cancel"){
+          await connection.execute("UPDATE trade_log SET statusStr = '"+result.state+"', status =1 WHERE `id` = '"+data[i].id+"'");
+          await connection.execute("UPDATE variable SET status = 3 WHERE `key` = '"+data[i].type+"'");
         }
       }else{
         var result = await bithumb.xcoinApiCall('/info/order_detail', {
