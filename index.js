@@ -323,10 +323,15 @@ async function checkOrder(){
 
         }else if(result.state=="cancel"){
           const [status, fileds] = await connection.execute("SELECT status FROM variable WHERE `key` = '"+data[i].type+"' ");
-          const [trade, fileds] = await connection.execute("SELECT price FROM trade_log WHERE buysell=1 AND `type` = '"+data[i].type+"' ORDER BY id desc limit 1");
+          const [trade, fileds] = await connection.execute("SELECT type,slug,lockAmount,price FROM trade_log WHERE buysell=1 AND `type` = '"+data[i].type+"' ORDER BY id desc limit 1");
           if(status[0].status==1){
+            var coinPrice = await upbit.coinPrice(trade[0].slug);
+
+            await sell(trade[0].type,trade[0].lockAmount,coinPrice*1.01,false,trade[0].slug,"upbit")
             await connection.execute("UPDATE variable SET status = 4,value = value+"+trade[0].price+" WHERE `key` = '"+data[i].type+"'");
             await connection.execute("UPDATE trade_log SET statusStr = '"+result.state+"', status =1 WHERE type=");
+
+
           }else{
             await connection.execute("UPDATE variable SET status = 3 WHERE `key` = '"+data[i].type+"'");
           }
