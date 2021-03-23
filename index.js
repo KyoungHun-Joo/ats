@@ -451,7 +451,7 @@ async function upbitTrade(connection){
       inputRSI15.values = [];
       const market = upbitData[i].market;
       const priceData = upbitData[i].data;
-console.log('priceData',priceData)
+
       for(let j=priceData.length-1; j>=0; j--){
         await inputRSI15.values.push(priceData[j].trade_price)
       }
