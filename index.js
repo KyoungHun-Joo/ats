@@ -322,8 +322,16 @@ async function checkOrder(){
           }
 
         }else if(result.state=="cancel"){
+          const [status, fileds] = await connection.execute("SELECT status FROM variable WHERE `key` = '"+data[i].type+"' ");
+          const [trade, fileds] = await connection.execute("SELECT price FROM trade_log WHERE buysell=1 AND `type` = '"+data[i].type+"' ORDER BY id desc limit 1");
+          if(status[0].status==1){
+            await connection.execute("UPDATE variable SET status = 4,value = value+"+trade[0].price+" WHERE `key` = '"+data[i].type+"'");
+            await connection.execute("UPDATE trade_log SET statusStr = '"+result.state+"', status =1 WHERE type=");
+          }else{
+            await connection.execute("UPDATE variable SET status = 3 WHERE `key` = '"+data[i].type+"'");
+          }
           await connection.execute("UPDATE trade_log SET statusStr = '"+result.state+"', status =1 WHERE `id` = '"+data[i].id+"'");
-          await connection.execute("UPDATE variable SET status = 3 WHERE `key` = '"+data[i].type+"'");
+
         }
       }else{
         var result = await bithumb.xcoinApiCall('/info/order_detail', {
