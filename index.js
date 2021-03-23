@@ -322,8 +322,8 @@ async function checkOrder(){
           }
 
         }else if(result.state=="cancel"){
-          const [status, fileds] = await connection.execute("SELECT status FROM variable WHERE `key` = '"+data[i].type+"' ");
-          const [trade, fileds] = await connection.execute("SELECT type,slug,lockAmount,price FROM trade_log WHERE buysell=1 AND `type` = '"+data[i].type+"' ORDER BY id desc limit 1");
+          const [status, fileds1] = await connection.execute("SELECT status FROM variable WHERE `key` = '"+data[i].type+"' ");
+          const [trade, fileds2] = await connection.execute("SELECT type,slug,lockAmount,price FROM trade_log WHERE buysell=1 AND `type` = '"+data[i].type+"' ORDER BY id desc limit 1");
           if(status[0].status==1){
             var coinPrice = await upbit.coinPrice(trade[0].slug);
 
