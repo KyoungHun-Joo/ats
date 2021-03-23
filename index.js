@@ -332,7 +332,6 @@ async function checkOrder(){
         });
         result = JSON.parse(result)
 
-
         if(result.data.order_status=="Completed"){
           const [leftValue, fileds] = await connection.execute("SELECT value FROM variable WHERE `key` = '"+data[i].type+"' ");
 
@@ -447,9 +446,9 @@ async function upbitTrade(connection){
       }
       const rsiRes15 = await RSI.calculate(inputRSI15);
       const lastRSI15 = (rsiRes15[rsiRes15.length-1]>=0)?rsiRes15[rsiRes15.length-1]:0;
-      
-      if(await upbitCompare(1,lastRSI15,0,0) && !buyFlag){
-        console.log('market',market,lastRSI15,priceData[0].trade_price)
+      console.log('market',market,lastRSI15,priceData[0].trade_price)
+
+      if((await upbitCompare(1,lastRSI15,0,0)) && !buyFlag){
         buyFlag = true;
         await buy(type,value,priceData[0].trade_price,false,market,"upbit")
       } 
