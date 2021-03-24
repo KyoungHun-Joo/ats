@@ -103,7 +103,7 @@ UpbitAPI.prototype.trade = async function(tradeType,market,price=null,volume=nul
       price: price,
       ord_type: 'limit',
   }
-  
+  console.log('body',body)
   var result = await this.request("/v1/orders",body,"POST");
 
   return result.uuid;
