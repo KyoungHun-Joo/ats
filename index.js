@@ -78,7 +78,7 @@ async function bithumbCall(type,coinPrice,unit,slug){
 async function buy(type,amount,coinPrice,test=false,slug="ETH",platform="bithumb"){
 
   if(platform == "upbit"){
-    coinPrice = upbit.converPrice(coinPrice);
+    coinPrice = await upbit.converPrice(coinPrice);
     var lockAmount = Math.floor((amount/coinPrice)*10000)/10000;
   }else{
     var lockAmount = Math.floor((amount/coinPrice)*1000)/1000;
@@ -128,17 +128,13 @@ async function sell(type,lockAmount,coinPrice,test=false,slug="ETH",platform){
   if(test){
 
     await connection.execute("UPDATE variable SET value = value + "+value+",status=3, lockAmount = 0 WHERE `key` = '"+type+"'");
-
     await connection.query("INSERT INTO trade_log (type, price, lockAmount, buysell,buysellPrice, order_id,slug,status) VALUES ('"
     +type+"', '"+value+"', '"+lockAmount+"',2,'"+coinPrice+"','','"+slug+"',1)")
 
   }else{
     if(platform=='upbit'){
-      coinPrice = upbit.converPrice(coinPrice);
-
+      coinPrice = await upbit.converPrice(coinPrice);
       var order_id = await upbit.trade('ask',slug,coinPrice,lockAmount);
-      console.log('order id',order_id)
-
     }else{
       var order_id = await bithumbCall('sell',coinPrice,lockAmount,slug);
     }
