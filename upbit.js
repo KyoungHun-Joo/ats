@@ -79,8 +79,7 @@ UpbitAPI.prototype.minInfo = async function(params){
     .then(json => console.log(json))
     .catch(err => console.error('error:' + err));
 }
-
-UpbitAPI.prototype.trade = async function(tradeType,market,price=null,volume=null){
+UpbitAPI.prototype.converPrice = async function(price){
   price = Number(price);
   if(0<=price && price<1000){
     price = Math.floor(price);
@@ -95,6 +94,10 @@ UpbitAPI.prototype.trade = async function(tradeType,market,price=null,volume=nul
   }else if(2000000<=price){
     price = Math.floor(price/1000)*1000;
   }
+  return price;
+}
+UpbitAPI.prototype.trade = async function(tradeType,market,price=null,volume=null){
+ 
   
   const body = {
       market: market,
