@@ -81,6 +81,7 @@ UpbitAPI.prototype.minInfo = async function(params){
 }
 UpbitAPI.prototype.converPrice = async function(price){
   price = Number(price);
+
   if(0<=price && price<1000){
     price = Math.floor(price);
   }else if(1000<=price && price<100000){
@@ -98,7 +99,6 @@ UpbitAPI.prototype.converPrice = async function(price){
 }
 UpbitAPI.prototype.trade = async function(tradeType,market,price=null,volume=null){
  
-  price -= price*0.001
   const body = {
       market: market,
       side: tradeType,

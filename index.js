@@ -318,6 +318,7 @@ async function checkOrder(){
             console.log('ask completed',trade_amount,leftValue,trade_fee)
 
             trade_amount = trade_amount - trade_fee;
+            trade_amount -= trade_amount * 0.0005
             await connection.execute("UPDATE variable SET status = 3,value = value + '"+trade_amount+"' WHERE `key` = '"+data[i].type+"'");
           }
 
