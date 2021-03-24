@@ -98,7 +98,7 @@ UpbitAPI.prototype.converPrice = async function(price){
 }
 UpbitAPI.prototype.trade = async function(tradeType,market,price=null,volume=null){
  
-  
+  price -= price*0.001
   const body = {
       market: market,
       side: tradeType,
