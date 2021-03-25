@@ -295,7 +295,7 @@ async function checkOrder(){
       if(data[i].type=='upbitMoney' || data[i].type=='upbit2Money'){
         var result = await upbit.orderInfo(data[i].order_id);
         var nowPrice = await upbit.coinPrice(data[i].slug);
-        console.log('now --',data[i].slug,nowPrice)
+        console.log('now --',data[i].slug,nowPrice,' -> ',data[i].buysellPrice)
 
         if(result.state=="done"){
           const [leftValue, fileds] = await connection.execute("SELECT value FROM variable WHERE `key` = '"+data[i].type+"' ");
