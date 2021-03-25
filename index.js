@@ -292,11 +292,9 @@ async function checkOrder(){
       var trade_amount =0;
       var trade_fee =0;
       var trade_units =0;
-      console.log('type',data[i].type)
       if(data[i].type=='upbitMoney' || data[i].type=='upbit2Money'){
-        console.log(1)
         var result = await upbit.orderInfo(data[i].order_id);
-        console.log(2,data[i].slug)
+        console.log(2,result)
         var coinPrice = await upbit.coinPrice(data[i].slug);
         console.log('now --',slug,coinPrice)
 
