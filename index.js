@@ -293,7 +293,7 @@ async function checkOrder(){
       var trade_fee =0;
       var trade_units =0;
 
-      if(data[i].type=='upbitMoney'){
+      if(data[i].type=='upbitMoney' || data[i].type=='upbit2Money'){
         var result = await upbit.orderInfo(data[i].order_id);
 
         if(result.state=="done"){
