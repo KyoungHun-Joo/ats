@@ -294,7 +294,9 @@ async function checkOrder(){
       var trade_units =0;
       console.log('type',data[i].type)
       if(data[i].type=='upbitMoney' || data[i].type=='upbit2Money'){
+        console.log(1)
         var result = await upbit.orderInfo(data[i].order_id);
+        console.log(2)
         var coinPrice = await upbit.coinPrice(data[i].slug);
         console.log('now --',slug,coinPrice)
 
@@ -314,13 +316,12 @@ async function checkOrder(){
           //구매완료
           if(result.side=='bid'){
             console.log('bid completed',trade_amount,leftValue,trade_fee)
-            var bidVal = Number(leftValue[0].value)-trade_amount-trade_fee ;
+            var bidVal = Number(leftValue[0].value)-trade_amount ;
             await connection.execute("UPDATE variable SET status = 4,value='"+bidVal+"',lockAmount = '"+trade_units+"',lastPrice = '"+result.price+"' WHERE `key` = '"+data[i].type+"'");
           }else if(result.side=='ask'){
             console.log('ask completed',trade_amount,leftValue,trade_fee)
 
             trade_amount = trade_amount - trade_fee;
-            trade_amount -= trade_amount * 0.0005
             await connection.execute("UPDATE variable SET status = 3,value = value + '"+trade_amount+"' WHERE `key` = '"+data[i].type+"'");
           }
 
