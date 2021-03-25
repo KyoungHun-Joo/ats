@@ -431,7 +431,7 @@ async function bitumbTrade(){
 }
 
 async function upbitTrade(connection){
-  const [upData, fields] = await connection.execute("SELECT value,lockAmount,status,slug,lastPrice FROM variable where `key` LIKE 'upbit%'");
+  const [upData, fields] = await connection.execute("SELECT * FROM variable where `key` LIKE 'upbit%'");
 
   var inputRSI15 = {
     values:[],
