@@ -431,54 +431,51 @@ async function bitumbTrade(){
 }
 
 async function upbitTrade(connection){
-  const [dbData, fields] = await connection.execute("SELECT value,lockAmount,status,slug,lastPrice FROM variable where `key` = 'upbitMoney'");
-  const valueStatus = dbData[0].status;
-  const lastPrice = dbData[0].lastPrice;
-  const slug = dbData[0].slug;
-  const value = dbData[0].value;
-  const lockAmount = dbData[0].lockAmount;
-  const type = "upbitMoney"
+  const [upData, fields] = await connection.execute("SELECT value,lockAmount,status,slug,lastPrice FROM variable where `key` LIKE 'upbit%'");
+
   var inputRSI15 = {
     values:[],
     period : 14
   }
 
-  if(valueStatus == 3){
-    var buyFlag = false;
-    var buyFlag2 = false;
-
+  for(let x=0; x<upData.length; x++){
+    const valueStatus = upData[x].status;
+    const lastPrice = upData[x].lastPrice;
+    const slug = upData[x].slug;
+    const value = upData[x].value;
+    const lockAmount = upData[x].lockAmount;
+    const type = upData[x].key;
     const upbitData = await upbit.useCoinInfo(connection,30,200);
-
-    for(let i=0; i<upbitData.length; i++){
-
-      inputRSI15.values = [];
-      const market = upbitData[i].market;
-      const priceData = upbitData[i].data;
-
-      for(let j=priceData.length-1; j>=0; j--){
-        await inputRSI15.values.push(priceData[j].trade_price)
+    if(valueStatus == 3){
+      var buyFlag = false;
+  
+      for(let i=0; i<upbitData.length; i++){
+  
+        inputRSI15.values = [];
+        const market = upbitData[i].market;
+        const priceData = upbitData[i].data;
+  
+        for(let j=priceData.length-1; j>=0; j--){
+          await inputRSI15.values.push(priceData[j].trade_price)
+        }
+        const rsiRes15 = await RSI.calculate(inputRSI15);
+        const lastRSI15 = (rsiRes15[rsiRes15.length-1]>=0)?rsiRes15[rsiRes15.length-1]:0;
+        console.log('market',market,lastRSI15,priceData[0].trade_price)
+  
+        if((await upbitCompare(1,lastRSI15,0,0)) && !buyFlag){
+          buyFlag = true;
+          await buy(type,value,priceData[0].trade_price,false,market,"upbit")
+        } 
       }
-      const rsiRes15 = await RSI.calculate(inputRSI15);
-      const lastRSI15 = (rsiRes15[rsiRes15.length-1]>=0)?rsiRes15[rsiRes15.length-1]:0;
-      console.log('market',market,lastRSI15,priceData[0].trade_price)
-
-      if((await upbitCompare(1,lastRSI15,0,0)) && !buyFlag){
-        buyFlag = true;
-        await buy(type,value,priceData[0].trade_price,false,market,"upbit")
-      } 
-
-      if((await upbitCompare(1,lastRSI15,0,0)) && !buyFlag2){
-        buyFlag2= true;
-        await buy('upbit2Money',value,priceData[0].trade_price,false,market,"upbit")
-      } 
+  
+    }else if(valueStatus == 4){
+      var coinPrice = await upbit.coinPrice(slug);
+      console.log('coinPrice',lockAmount,lastPrice,slug,coinPrice)
+      //if(await upbitCompare(2,0,lastPrice,coinPrice)) await sell(type,lockAmount,coinPrice,false,slug,"upbit")
+      await sell(type,lockAmount,lastPrice*1.01,false,slug,"upbit")
     }
-
-  }else if(valueStatus == 4){
-    var coinPrice = await upbit.coinPrice(slug);
-    console.log('coinPrice',lockAmount,lastPrice,slug,coinPrice)
-    //if(await upbitCompare(2,0,lastPrice,coinPrice)) await sell(type,lockAmount,coinPrice,false,slug,"upbit")
-    await sell(type,lockAmount,lastPrice*1.01,false,slug,"upbit")
   }
+
 }
 
 async function call(event, context, callback) {
