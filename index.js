@@ -316,7 +316,7 @@ async function checkOrder(){
             var bidVal = Number(leftValue[0].value)-trade_amount ;
             await connection.execute("UPDATE variable SET status = 4,value='"+bidVal+"',lockAmount = '"+trade_units+"',lastPrice = '"+result.price+"' WHERE `key` = '"+data[i].type+"'");
           }else if(result.side=='ask'){
-            console.log('ask completed',trade_amount,leftValue,trade_fee)
+            console.log('ask completed',trade_amount,leftValue[0].value,trade_fee)
             //다음 주문시 trade fee 미리 차감
             trade_amount = trade_amount - trade_fee - trade_fee;
             await connection.execute("UPDATE variable SET status = 3,value = value + '"+trade_amount+"' WHERE `key` = '"+data[i].type+"'");
