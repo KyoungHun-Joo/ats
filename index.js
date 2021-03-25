@@ -464,6 +464,11 @@ async function upbitTrade(connection){
         buyFlag = true;
         await buy(type,value,priceData[0].trade_price,false,market,"upbit")
       } 
+
+      if((await upbitCompare(1,lastRSI15,0,0)) && !buyFlag){
+        buyFlag = true;
+        await buy('upbit2Money',value,priceData[0].trade_price,false,market,"upbit")
+      } 
     }
 
   }else if(valueStatus == 4){
