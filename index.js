@@ -445,6 +445,8 @@ async function upbitTrade(connection){
 
   if(valueStatus == 3){
     var buyFlag = false;
+    var buyFlag2 = false;
+
     const upbitData = await upbit.useCoinInfo(connection,30,200);
 
     for(let i=0; i<upbitData.length; i++){
@@ -465,8 +467,8 @@ async function upbitTrade(connection){
         await buy(type,value,priceData[0].trade_price,false,market,"upbit")
       } 
 
-      if((await upbitCompare(1,lastRSI15,0,0)) && !buyFlag){
-        buyFlag = true;
+      if((await upbitCompare(1,lastRSI15,0,0)) && !buyFlag2){
+        buyFlag2= true;
         await buy('upbit2Money',value,priceData[0].trade_price,false,market,"upbit")
       } 
     }
