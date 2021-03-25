@@ -156,7 +156,7 @@ UpbitAPI.prototype.marketInfo = async function(){
 UpbitAPI.prototype.request = async function(apiUrl,body,type,qs={}){
   var result;
   var options;
-  console.log('body',body)
+
 	try{
 		const query = queryEncode(body)
 		const hash = crypto.createHash('sha512')

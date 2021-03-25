@@ -432,12 +432,17 @@ async function bitumbTrade(){
 
 async function upbitTrade(connection){
   const [upData, fields] = await connection.execute("SELECT * FROM variable where `key` LIKE 'upbit%'");
-
+  var upbitData;
   var inputRSI15 = {
     values:[],
     period : 14
   }
-console.log('updata length',upData.length)
+  var getCoin = false;
+  for(let x=0; x<upData.length; x++){
+    if(upData[x].status==3) getCoin = true;
+  }
+  if(getCoin) upbitData = await upbit.useCoinInfo(connection,30,200);
+  
   for(let x=0; x<upData.length; x++){
     const valueStatus = upData[x].status;
     const lastPrice = upData[x].lastPrice;
@@ -445,10 +450,10 @@ console.log('updata length',upData.length)
     const value = upData[x].value;
     const lockAmount = upData[x].lockAmount;
     const type = upData[x].key;
-    const upbitData = await upbit.useCoinInfo(connection,30,200);
     if(valueStatus == 3){
       var buyFlag = false;
-  
+      
+
       for(let i=0; i<upbitData.length; i++){
   
         inputRSI15.values = [];
