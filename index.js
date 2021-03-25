@@ -295,7 +295,7 @@ async function checkOrder(){
 
       if(data[i].type=='upbitMoney' || data[i].type=='upbit2Money'){
         var result = await upbit.orderInfo(data[i].order_id);
-        var coinPrice = await upbit.coinPrice(trade[0].slug);
+        var coinPrice = await upbit.coinPrice(data[i].slug);
         console.log('now --',slug,coinPrice)
 
         if(result.state=="done"){
