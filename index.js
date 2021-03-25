@@ -437,7 +437,7 @@ async function upbitTrade(connection){
     values:[],
     period : 14
   }
-
+console.log('updata length',upData.length)
   for(let x=0; x<upData.length; x++){
     const valueStatus = upData[x].status;
     const lastPrice = upData[x].lastPrice;
