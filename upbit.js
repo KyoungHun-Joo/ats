@@ -141,6 +141,7 @@ UpbitAPI.prototype.coinInfo = async function(minutes,market,count){
 
 UpbitAPI.prototype.coinPrice = async function(market){
   var coin = await this.coinInfo(1,market,1);
+  console.log('coin',coin)
   return coin[0].trade_price;
 }
 UpbitAPI.prototype.marketInfo = async function(){
