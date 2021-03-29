@@ -319,6 +319,7 @@ async function checkOrder(){
             console.log('ask completed',trade_amount,leftValue[0].value,trade_fee)
             //다음 주문시 trade fee 미리 차감
             trade_amount = trade_amount - trade_fee - trade_fee;
+            trade_amount = Math.floor(trade_amount)
             await connection.execute("UPDATE variable SET status = 3,value = value + '"+trade_amount+"' WHERE `key` = '"+data[i].type+"'");
           }
 
