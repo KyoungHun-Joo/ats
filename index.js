@@ -1,8 +1,8 @@
 process.env.TZ = 'Asia/Seoul'
 
-const rp = require('request-promise');
 const rsiCompare1 = require('./strategy/rsiCompare1')
 const upbitCompare = require('./strategy/upbitCompare')
+const CONFIG = require('./config')();
 
 const mysql_dbc = require('./db_con')();
 const Bithumb = require('./bithumb');
@@ -10,7 +10,6 @@ const UpbitAPI = require('./upbit');
 
 const AWS = require('aws-sdk');
 const mailService = require('./email');
-const CONFIG = require('./config')();
 
 const bithumb = new Bithumb();
 const upbit = new UpbitAPI();
@@ -55,26 +54,6 @@ function getCmcKey(){
   return cmc_key;
 }
 
-async function bithumbCall(type,coinPrice,unit,slug){
-  var rgParams = {
-    order_currency:slug,
-    payment_currency:'KRW',
-    units:Number(unit),
-    price:coinPrice
-  };
-
-  if(type=="buy"){
-    rgParams['type'] = 'bid';
-  }else if(type=='sell'){
-    rgParams['type'] = 'ask';
-  }
-  console.log('bitumb call', rgParams)
-  var result = JSON.parse(await bithumb.xcoinApiCall('/trade/place', rgParams));
-  await connection.query("INSERT INTO log (text) VALUES ('"+JSON.stringify(result).toString()+"')");
-
-  return (result.status==0000)? result.order_id:"";
-}
-
 async function buy(type,amount,coinPrice,test=false,slug="ETH",platform="bithumb"){
 
   if(platform == "upbit"){
@@ -98,7 +77,8 @@ async function buy(type,amount,coinPrice,test=false,slug="ETH",platform="bithumb
       var order_id = await upbit.trade('bid',slug,coinPrice,lockAmount);
       console.log('order id',order_id)
     }else{
-      var order_id = await bithumbCall('buy',coinPrice,lockAmount,slug);
+      
+      var order_id = await bithumb.call('buy',coinPrice,lockAmount,slug);
     }
 
     if(order_id){
@@ -119,6 +99,7 @@ async function sell(type,lockAmount,coinPrice,test=false,slug="ETH",platform){
   const [data, fields] = await connection.execute("SELECT price,fee,buysellPrice,slug FROM trade_log where `type` = '"+type+"' AND `buysell` = 1 ORDER BY createdAt DESC LIMIT 0,1");
   var buysellPrice = data[0].buysellPrice;
   var left = data[0].price - data[0].fee - value;
+  console.log('sell in 2 ',slug,data[0].slug)
   if(slug!=data[0].slug) return;
 
   if(platform != "upbit" && buysellPrice>0 && buysellPrice*1.0225 > coinPrice){
@@ -136,7 +117,7 @@ async function sell(type,lockAmount,coinPrice,test=false,slug="ETH",platform){
       coinPrice = await upbit.converPrice(coinPrice);
       var order_id = await upbit.trade('ask',slug,coinPrice,lockAmount);
     }else{
-      var order_id = await bithumbCall('sell',coinPrice,lockAmount,slug);
+      var order_id = await bithumb.call('sell',coinPrice,lockAmount,slug);
     }
 
     if(order_id){
@@ -175,17 +156,15 @@ async function compareRSI1(connection, rsiArr,lastRSI,coinPrice,slug){
 
 //급등락 대비
 async function compareRSI2(connection, rsiArr,lastRSI,coinPrice,slug){
-  if(minLambda){
-    var type = 'money5'
-  }else{
-    var type = 'money2'
-  }
+  var type = 'money5'
+
   const [data, fields] = await connection.execute("SELECT value,lockAmount,status,slug FROM variable where `key` = '"+type+"'");
   var money = data[0].value;
   var lockAmount = data[0].lockAmount;
   var status = data[0].status;
-
-  const compareRSI = rsiArr.slice(rsiArr.length-20);
+  var comSlug = data[0].slug;
+  if(comSlug != slug) return;
+  const compareRSI = rsiArr.slice(-20);
 
   var turnToHigh = false;
   var turnToLow = false;
@@ -207,8 +186,8 @@ async function compareRSI2(connection, rsiArr,lastRSI,coinPrice,slug){
 
       if(beforeCompare2>highPoint && beforeCompare>highPoint && lastRSI<beforeCompare) turnToLow = true;
     }
-
   }
+  console.log('compare2',slug,beforeCompare2,beforeCompare,compare,lastRSI)
   //console.log('compare2',beforeCompare2,beforeCompare,lastRSI);
   //rsi 20 아래로 떨어지면 그냥 구매
   if(lastRSI<17){
@@ -236,7 +215,7 @@ async function compareRSI3(connection, rsiArr,lastRSI,coinPrice,slug){
     const [data, fields] = await connection.execute("SELECT value,lockAmount,status,slug FROM variable where `key` = 'money3'");
     var money = data[0].value;
     var status = data[0].status;
-
+    
     const compareRSI = rsiArr.slice(-12);
     var totalRSI = 0;
     var totalCnt = 0;
@@ -283,8 +262,8 @@ async function expire(){
 
 async function checkOrder(){
 
-  const [data, fields] = await connection.execute("SELECT * FROM trade_log WHERE status=0 AND order_id != '' ");
-
+  const [data, fields] = await mysql_dbc.select('trade_log',['type'],{status:" =0 ", order_id:" != ''"});
+  if(!data) return;
   for(let i=0;i<data.length;i++){
     if(!data[i].order_id) return;
     try{
@@ -293,12 +272,14 @@ async function checkOrder(){
       var trade_fee =0;
       var trade_units =0;
       if(data[i].type=='upbitMoney' || data[i].type=='upbit2Money'){
+
         var result = await upbit.orderInfo(data[i].order_id);
         var nowPrice = await upbit.coinPrice(data[i].slug);
         console.log('now --',data[i].slug,nowPrice,' -> ',data[i].buysellPrice)
 
         if(result.state=="done"){
-          const [leftValue, fileds] = await connection.execute("SELECT value FROM variable WHERE `key` = '"+data[i].type+"' ");
+          const [leftValue, fileds] = await mysql_dbc.select('variable',['value'],{key:" ='"+data[i].type+"' "});
+          
           var trade_fee =0;
           var trade_units =0;
 
@@ -386,10 +367,17 @@ async function bitumbTrade(){
   var cmc_key = getCmcKey();
 
   var response = await bithumb.orderBook();
-  
+  var inputRSI = {
+    values:[],
+    period : 14
+  }
+  var inputRSI15 = {
+    values:[],
+    period : 14
+  }
   if(response.status == "0000"){
     var coinDatas = response.data;
-
+    const coinArr = ['ONG','ORC','ADA','EOS','ETH','BTC']
     for(let i=0;i<Object.keys(coinDatas).length;i++){
       if(coinArr.includes(Object.keys(coinDatas)[i])){
         inputRSI.values = [];
@@ -402,6 +390,7 @@ async function bitumbTrade(){
         +cmc_key+"',  '"+coinKey+"', '"+coinPrice+"')")
 
         const [priceData, fields] = await connection.execute("SELECT * FROM "+priceTable+" WHERE slug='"+coinKey+"' ORDER BY createdAt DESC LIMIT 1000");
+
         const compareMin = (new Date().getMinutes())%15;
 
         for(let i=priceData.length-1; i>=0; i--){
@@ -418,9 +407,9 @@ async function bitumbTrade(){
         if(lastRSI>0){
 
           await connection.query("UPDATE "+priceTable+" SET rsi = "+lastRSI+", rsi15 = "+lastRSI15+" WHERE date_key = '"+cmc_key+"' AND slug='"+coinKey+"'");
-          await compareRSI1(connection, rsiRes15,lastRSI15,coinPrice,coinKey);
+          //await compareRSI1(connection, rsiRes15,lastRSI15,coinPrice,coinKey);
           await compareRSI2(connection, rsiRes15,lastRSI15,coinPrice,coinKey);
-          await compareRSI3(connection, rsiRes15,lastRSI15,coinPrice,coinKey);
+          //await compareRSI3(connection, rsiRes15,lastRSI15,coinPrice,coinKey);
 
         }else{
           await connection.query("INSERT INTO log (text) VALUES ('no rsi"+lastRSI+"')");
@@ -451,12 +440,11 @@ async function upbitTrade(connection){
     const value = upData[x].value;
     const lockAmount = upData[x].lockAmount;
     const type = upData[x].key;
+    const weight = upData[x].weight;
+
     if(valueStatus == 3){
       var buyFlag = false;
-      
-
       for(let i=0; i<upbitData.length; i++){
-  
         inputRSI15.values = [];
         const market = upbitData[i].market;
         const priceData = upbitData[i].data;
@@ -490,21 +478,11 @@ async function call(event, context, callback) {
   const cmc_key = getCmcKey();
   connection = await mysql_dbc.init();
 
-
-  var inputRSI = {
-    values:[],
-    period : 14
-  }
-  var inputRSI15 = {
-    values:[],
-    period : 14
-  }
-
   try{
 
     await checkOrder();
-    //await bitumbTrade();
-    await upbitTrade(connection);
+    await bitumbTrade();
+    //await upbitTrade(connection);
 
     await connection.release();
 
@@ -543,7 +521,8 @@ async function recall(){
 }
 
 exports.handler = call;
+
 // second minute hour day-of-month month day-of-week
-cron.schedule('* * * * *', function(){
-  call();
-});
+//cron.schedule('* * * * *', function(){
+//  call();
+//});

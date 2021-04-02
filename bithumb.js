@@ -7,6 +7,24 @@ function XCoinAPI(){
 	this.api_secret = CONFIG.BITHUMB_SECRET;
 }
 
+XCoinAPI.prototype.call = async function(type,coinPrice,unit,slug){
+  var rgParams = {
+    order_currency:slug,
+    payment_currency:'KRW',
+    units:Number(unit),
+    price:coinPrice
+  };
+
+  if(type=="buy"){
+    rgParams['type'] = 'bid';
+  }else if(type=='sell'){
+    rgParams['type'] = 'ask';
+  }
+  console.log('bitumb call', rgParams)
+  var result = JSON.parse(await this.xcoinApiCall('/trade/place', rgParams));
+  return (result.status==0000)? result.order_id:"";
+}
+
 XCoinAPI.prototype.orderBook = async function(endPoint, params) {
 	const coinArr = ['BTC','ETH','GRS','ONG','ADA','EOS','ORC'];
 
