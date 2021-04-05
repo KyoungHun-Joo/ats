@@ -2,11 +2,11 @@ const CONFIG = require('../config')();
 
 //buySell = 1 -> 구매여부
 //buySell = 2 -> 판매매여부
-async function strategy(buySell, lastRSI,lastPrice, price){
+async function strategy(buySell, lastRSI,lastPrice, price,weight=0){
 
   //매수전
   if(buySell == 1){
-    if(lastRSI<=CONFIG.LOW_POINT+10){
+    if(lastRSI<=CONFIG.LOW_POINT+10-weight){
       return true;
     }else{
       return false;

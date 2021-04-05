@@ -60,6 +60,7 @@ async function buy(type,amount,coinPrice,test=false,slug="ETH",platform="bithumb
     coinPrice = await upbit.converPrice(coinPrice);
     var lockAmount = Math.floor((amount/coinPrice)*10000)/10000;
   }else{
+
     var lockAmount = Math.floor((amount/coinPrice)*1000)/1000;
   }
   amount -= lockAmount*coinPrice;
@@ -77,7 +78,9 @@ async function buy(type,amount,coinPrice,test=false,slug="ETH",platform="bithumb
       var order_id = await upbit.trade('bid',slug,coinPrice,lockAmount);
       console.log('order id',order_id)
     }else{
-      
+      lockAmount *= 0.99;
+      lockAmount = Math.floor((lockAmount)*1000)/1000;
+
       var order_id = await bithumb.call('buy',coinPrice,lockAmount,slug);
     }
 
@@ -163,7 +166,7 @@ async function compareRSI2(connection, rsiArr,lastRSI,coinPrice,slug){
   var lockAmount = data[0].lockAmount;
   var status = data[0].status;
   var comSlug = data[0].slug;
-  if(comSlug != slug) return;
+  if(comSlug != slug && status!=3) return;
   const compareRSI = rsiArr.slice(-20);
 
   var turnToHigh = false;
@@ -262,8 +265,10 @@ async function expire(){
 
 async function checkOrder(){
 
-  const [data, fields] = await mysql_dbc.select('trade_log',['type'],{status:" =0 ", order_id:" != ''"});
+  const data = await mysql_dbc.select('trade_log',[],{status:" =0 ", order_id:" != ''"});
+  
   if(!data) return;
+
   for(let i=0;i<data.length;i++){
     if(!data[i].order_id) return;
     try{
@@ -295,13 +300,14 @@ async function checkOrder(){
           if(result.side=='bid'){
             console.log('bid completed',trade_amount,leftValue,trade_fee)
             var bidVal = Number(leftValue[0].value)-trade_amount ;
-            await connection.execute("UPDATE variable SET status = 4,value='"+bidVal+"',lockAmount = '"+trade_units+"',lastPrice = '"+result.price+"' WHERE `key` = '"+data[i].type+"'");
+            await connection.execute("UPDATE variable SET status = 4,value='"+bidVal+"',lockAmount = '"+trade_units+"',lastPrice = '"+result.price+"', weight = weight+1 WHERE `key` = '"+data[i].type+"'");
           }else if(result.side=='ask'){
             console.log('ask completed',trade_amount,leftValue[0].value,trade_fee)
             //다음 주문시 trade fee 미리 차감
             trade_amount = trade_amount - trade_fee - trade_fee;
             trade_amount = Math.floor(trade_amount)
             await connection.execute("UPDATE variable SET status = 3,value = value + '"+trade_amount+"' WHERE `key` = '"+data[i].type+"'");
+            await connection.execute("UPDATE variable SET weight = 0 WHERE `key` != '"+data[i].type+"'");
           }
 
         }else if(result.state=="cancel"){
@@ -320,10 +326,12 @@ async function checkOrder(){
 
         }
       }else{
+
         var result = await bithumb.xcoinApiCall('/info/order_detail', {
           order_currency:data[i].slug,
           order_id:data[i].order_id,
         });
+
         result = JSON.parse(result)
 
         if(result.data.order_status=="Completed"){
@@ -341,12 +349,14 @@ async function checkOrder(){
           if(result.data.type=='bid'){
             console.log('bid completed',trade_amount,leftValue,trade_fee)
             var bidVal = Number(leftValue[0].value) - trade_amount + trade_fee;
-            await connection.execute("UPDATE variable SET status = 4,value='"+bidVal+"',lockAmount = '"+trade_units+"' WHERE `key` = '"+data[i].type+"'");
+            await connection.execute("UPDATE variable SET status = 4,value='"+bidVal+"',lockAmount = '"+trade_units+"', weight = weight+1 WHERE `key` = '"+data[i].type+"'");
           }else if(result.data.type=='ask'){
             console.log('ask completed',trade_amount,leftValue,trade_fee)
 
             trade_amount = trade_amount - trade_fee;
             await connection.execute("UPDATE variable SET status = 3,value = '"+trade_amount+"' WHERE `key` = '"+data[i].type+"'");
+            await connection.execute("UPDATE variable SET weight = 0 WHERE `key` != '"+data[i].type+"'");
+
           }
           return true;
         }else{
@@ -456,7 +466,7 @@ async function upbitTrade(connection){
         const lastRSI15 = (rsiRes15[rsiRes15.length-1]>=0)?rsiRes15[rsiRes15.length-1]:0;
         console.log('market',market,lastRSI15,priceData[0].trade_price)
   
-        if((await upbitCompare(1,lastRSI15,0,0)) && !buyFlag){
+        if((await upbitCompare(1,lastRSI15,0,0,weight)) && !buyFlag){
           buyFlag = true;
           await buy(type,value,priceData[0].trade_price,false,market,"upbit")
         } 

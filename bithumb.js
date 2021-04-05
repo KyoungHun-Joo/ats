@@ -20,8 +20,9 @@ XCoinAPI.prototype.call = async function(type,coinPrice,unit,slug){
   }else if(type=='sell'){
     rgParams['type'] = 'ask';
   }
-  console.log('bitumb call', rgParams)
-  var result = JSON.parse(await this.xcoinApiCall('/trade/place', rgParams));
+
+	var result = JSON.parse(await this.xcoinApiCall('/trade/place', rgParams));
+	console.log('bitumb call', rgParams,result)
   return (result.status==0000)? result.order_id:"";
 }
 
