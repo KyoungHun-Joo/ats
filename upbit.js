@@ -114,14 +114,14 @@ UpbitAPI.prototype.trade = async function(tradeType,market,price=null,volume=nul
 }
 UpbitAPI.prototype.useCoinInfo = async function(connection,minutes=1,count=200){
 	var cmc_key = getCmcKey();
-	const [data, fields] = await connection.execute("SELECT market FROM upbit_coin WHERE useStatus = 1");
+	const [data, fields] = await connection.execute("SELECT market,weight FROM upbit_coin WHERE useStatus = 1");
 	var market = []
 
 	try{
     
 		for(let i=data.length-1; i>=0; i--){
 			var result = await this.coinInfo(minutes,data[i].market,count);
-			market.push({market:data[i].market,data:result});
+			market.push({market:data[i].market,data:result,weight:data[i].weight});
     }
     
     //await connection.query("INSERT INTO upbit_min_price (cmc_key, market, opening_price,high_price,low_price,trade_price,acc_trade_price,acc_trade_volume) VALUES ('"

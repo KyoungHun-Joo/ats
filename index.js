@@ -301,7 +301,9 @@ async function checkOrder(){
           if(result.side=='bid'){
             console.log('bid completed',trade_amount,leftValue,trade_fee)
             var bidVal = Number(leftValue[0].value)-trade_amount ;
-            await connection.execute("UPDATE variable SET status = 4,value='"+bidVal+"',lockAmount = '"+trade_units+"',lastPrice = '"+result.price+"', weight = weight+1 WHERE `key` = '"+data[i].type+"'");
+            await connection.execute("UPDATE variable SET status = 4,value='"+bidVal+"',lockAmount = '"+trade_units+"',lastPrice = '"+result.price+"' WHERE `key` = '"+data[i].type+"'");
+            await connection.execute("UPDATE upbit_coin SET weight = weight+1 WHERE `market` = '"+data[i].type+"'");
+            await connection.execute("UPDATE upbit_coin SET weight = if(weight>0,weight -1,weight) WHERE `market` != '"+data[i].type+"'");
 
           }else if(result.side=='ask'){
             console.log('ask completed',trade_amount,leftValue[0].value,trade_fee)
@@ -309,7 +311,6 @@ async function checkOrder(){
             trade_amount = trade_amount - trade_fee - trade_fee;
             trade_amount = Math.floor(trade_amount)
             await connection.execute("UPDATE variable SET status = 3,value = value + '"+trade_amount+"' WHERE `key` = '"+data[i].type+"'");
-            await connection.execute("UPDATE variable SET weight = if(weight>0,weight -1,weight) WHERE `key` != '"+data[i].type+"'");
           }
 
         }else if(result.state=="cancel"){
@@ -351,13 +352,12 @@ async function checkOrder(){
           if(result.data.type=='bid'){
             console.log('bid completed',trade_amount,leftValue,trade_fee)
             var bidVal = Number(leftValue[0].value) - trade_amount + trade_fee;
-            await connection.execute("UPDATE variable SET status = 4,value='"+bidVal+"',lockAmount = '"+trade_units+"', weight = weight+1 WHERE `key` = '"+data[i].type+"'");
+            await connection.execute("UPDATE variable SET status = 4,value='"+bidVal+"',lockAmount = '"+trade_units+"' WHERE `key` = '"+data[i].type+"'");
           }else if(result.data.type=='ask'){
             console.log('ask completed',trade_amount,leftValue,trade_fee)
 
             trade_amount = trade_amount - trade_fee;
             await connection.execute("UPDATE variable SET status = 3,value = '"+trade_amount+"' WHERE `key` = '"+data[i].type+"'");
-            await connection.execute("UPDATE variable SET weight = 0 WHERE `key` != '"+data[i].type+"'");
 
           }
           return true;
@@ -452,7 +452,6 @@ async function upbitTrade(connection){
     const value = upData[x].value;
     const lockAmount = upData[x].lockAmount;
     const type = upData[x].key;
-    const weight = upData[x].weight;
 
     if(valueStatus == 3){
       var buyFlag = false;
@@ -460,7 +459,8 @@ async function upbitTrade(connection){
         inputRSI15.values = [];
         const market = upbitData[i].market;
         const priceData = upbitData[i].data;
-  
+        const weight = upbitData[i].weight;
+
         for(let j=priceData.length-1; j>=0; j--){
           await inputRSI15.values.push(priceData[j].trade_price)
         }
