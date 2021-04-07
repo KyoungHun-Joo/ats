@@ -264,7 +264,7 @@ async function expire(){
 }
 
 async function checkOrder(){
-
+console.log('test',mysql_dbc)
   const data = await mysql_dbc.select('trade_log',[],{status:" =0 ", order_id:" != ''"});
   
   if(!data) return;
