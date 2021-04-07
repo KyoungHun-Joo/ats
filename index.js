@@ -264,15 +264,16 @@ async function expire(){
 }
 
 async function checkOrder(){
-console.log('test',mysql_dbc)
-  const data = await mysql_dbc.select('trade_log',[],{status:" =0 ", order_id:" != ''"});
+
   
+  const [data, fields] = await connection.execute("SELECT * FROM trade_log WHERE status=0 AND order_id != '' ");
+
   if(!data) return;
 
   for(let i=0;i<data.length;i++){
     if(!data[i].order_id) return;
-    try{
-
+    try{ 
+ 
       var trade_amount =0;
       var trade_fee =0;
       var trade_units =0;
@@ -283,8 +284,8 @@ console.log('test',mysql_dbc)
         console.log('now --',data[i].slug,nowPrice,' -> ',data[i].buysellPrice)
 
         if(result.state=="done"){
-          const [leftValue, fileds] = await mysql_dbc.select('variable',['value'],{key:" ='"+data[i].type+"' "});
-          
+          const [leftValue, fileds] = await connection.execute("SELECT value FROM variable WHERE `key` = '"+data[i].type+"' ");
+
           var trade_fee =0;
           var trade_units =0;
 
@@ -469,7 +470,7 @@ async function upbitTrade(connection){
   
         if((await upbitCompare(1,lastRSI15,0,0,weight)) && !buyFlag){
           buyFlag = true;
-          //await buy(type,value,priceData[0].trade_price,false,market,"upbit")
+          await buy(type,value,priceData[0].trade_price,false,market,"upbit")
         } 
       }
   
