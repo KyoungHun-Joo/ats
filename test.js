@@ -31,6 +31,7 @@ async function call(){
     gzip: true
   };
   const coinArr = ['BTC','ETH','GRS','XEM','ONG','ADA','EOS'];
+
   var response = await rp(requestOptions2);
 
   if(response.status == "0000"){

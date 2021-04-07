@@ -276,7 +276,7 @@ async function checkOrder(){
       var trade_amount =0;
       var trade_fee =0;
       var trade_units =0;
-      if(data[i].type=='upbitMoney' || data[i].type=='upbit2Money'){
+      if(data[i].type=='upbitMoney'){
 
         var result = await upbit.orderInfo(data[i].order_id);
         var nowPrice = await upbit.coinPrice(data[i].slug);
@@ -301,13 +301,14 @@ async function checkOrder(){
             console.log('bid completed',trade_amount,leftValue,trade_fee)
             var bidVal = Number(leftValue[0].value)-trade_amount ;
             await connection.execute("UPDATE variable SET status = 4,value='"+bidVal+"',lockAmount = '"+trade_units+"',lastPrice = '"+result.price+"', weight = weight+1 WHERE `key` = '"+data[i].type+"'");
+
           }else if(result.side=='ask'){
             console.log('ask completed',trade_amount,leftValue[0].value,trade_fee)
             //다음 주문시 trade fee 미리 차감
             trade_amount = trade_amount - trade_fee - trade_fee;
             trade_amount = Math.floor(trade_amount)
             await connection.execute("UPDATE variable SET status = 3,value = value + '"+trade_amount+"' WHERE `key` = '"+data[i].type+"'");
-            await connection.execute("UPDATE variable SET weight = 0 WHERE `key` != '"+data[i].type+"'");
+            await connection.execute("UPDATE variable SET weight = if(weight>0,weight -1,weight) WHERE `key` != '"+data[i].type+"'");
           }
 
         }else if(result.state=="cancel"){
@@ -468,7 +469,7 @@ async function upbitTrade(connection){
   
         if((await upbitCompare(1,lastRSI15,0,0,weight)) && !buyFlag){
           buyFlag = true;
-          await buy(type,value,priceData[0].trade_price,false,market,"upbit")
+          //await buy(type,value,priceData[0].trade_price,false,market,"upbit")
         } 
       }
   
@@ -491,8 +492,8 @@ async function call(event, context, callback) {
   try{
 
     await checkOrder();
-    await bitumbTrade();
-    //await upbitTrade(connection);
+    //await bitumbTrade();
+    await upbitTrade(connection);
 
     await connection.release();
 
@@ -530,9 +531,9 @@ async function recall(){
   }
 }
 
-exports.handler = call;
+//exports.handler = call;
 
 // second minute hour day-of-month month day-of-week
-//cron.schedule('* * * * *', function(){
-//  call();
-//});
+cron.schedule('* * * * *', function(){
+  call();
+});
