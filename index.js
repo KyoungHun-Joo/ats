@@ -536,6 +536,6 @@ async function recall(){
 
 // second minute hour day-of-month month day-of-week
 cron.schedule('* * * * *', function(){
-  console.log('test call')
+  
   call();
 });
