@@ -5,7 +5,6 @@ node_modules/
 
 # Other files and folders
 .settings/
-db_con.js
 package-lock.json
 config.js
 
