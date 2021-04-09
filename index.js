@@ -302,8 +302,8 @@ async function checkOrder(){
             console.log('bid completed',trade_amount,leftValue,trade_fee)
             var bidVal = Number(leftValue[0].value)-trade_amount ;
             await connection.execute("UPDATE variable SET status = 4,value='"+bidVal+"',lockAmount = '"+trade_units+"',lastPrice = '"+result.price+"' WHERE `key` = '"+data[i].type+"'");
-            await connection.execute("UPDATE upbit_coin SET weight = weight+1 WHERE `market` = '"+data[i].type+"'");
-            await connection.execute("UPDATE upbit_coin SET weight = if(weight>0,weight -1,weight) WHERE `market` != '"+data[i].type+"'");
+            await connection.execute("UPDATE upbit_coin SET weight = weight+1 WHERE `market` = '"+data[i].slug+"'");
+            await connection.execute("UPDATE upbit_coin SET weight = if(weight>0,weight -0.5,weight) WHERE `market` != '"+data[i].slug+"'");
 
           }else if(result.side=='ask'){
             console.log('ask completed',trade_amount,leftValue[0].value,trade_fee)
@@ -443,7 +443,7 @@ async function upbitTrade(connection){
   for(let x=0; x<upData.length; x++){
     if(upData[x].status==3) getCoin = true;
   }
-  if(getCoin) upbitData = await upbit.useCoinInfo(connection,30,200);
+  if(getCoin) upbitData = await upbit.useCoinInfo(connection,3,200);
   
   for(let x=0; x<upData.length; x++){
     const valueStatus = upData[x].status;
