@@ -451,7 +451,7 @@ async function checkOrder() {
             trade_amount = trade_amount - trade_fee - trade_fee;
             trade_amount = Math.floor(trade_amount);
             await connection.execute(
-              "UPDATE variable SET status = 3,value = value + '" +
+              "UPDATE variable SET status = 3,value = '" +
                 trade_amount +
                 "' WHERE `key` = '" +
                 data[i].type +
