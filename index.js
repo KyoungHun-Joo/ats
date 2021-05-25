@@ -8,20 +8,18 @@ const mysql_dbc = require('./db_con')();
 const Bithumb = require('./bithumb');
 const UpbitAPI = require('./upbit');
 
-const AWS = require('aws-sdk');
-const mailService = require('./email');
-
 const bithumb = new Bithumb();
 const upbit = new UpbitAPI();
 const RSI = require('technicalindicators').RSI;
 const gap = 0;
 const lowPoint   = CONFIG.LOW_POINT +gap;
 const highPoint  = CONFIG.HIGH_POINT-gap;
-var connection;
+
 const minLambda = true;
 const priceTable = "price2";
-const http = require('https');
 const cron = require('node-cron');
+const type = "upbit";
+var connection;
 
 function numberPad(n) {
     n = n + '';
@@ -478,10 +476,9 @@ async function upbitTrade(connection){
       var coinPrice = await upbit.coinPrice(slug);
       console.log('coinPrice',lockAmount,lastPrice,slug,coinPrice)
       //if(await upbitCompare(2,0,lastPrice,coinPrice)) await sell(type,lockAmount,coinPrice,false,slug,"upbit")
-      await sell(type,lockAmount,lastPrice*1.01,false,slug,"upbit")
+      await sell(type,lockAmount,lastPrice*1.011,false,slug,"upbit")
     }
   }
-
 }
 
 async function call(event, context, callback) {
@@ -493,8 +490,11 @@ async function call(event, context, callback) {
   try{
 
     await checkOrder();
-    //await bitumbTrade();
-    await upbitTrade(connection);
+    if(type=='upbit'){
+      await upbitTrade(connection);
+    }else{
+      await bitumbTrade();
+    }
 
     await connection.release();
 
@@ -532,10 +532,15 @@ async function recall(){
   }
 }
 
-//exports.handler = call;
 
-// second minute hour day-of-month month day-of-week
-cron.schedule('* * * * *', function(){
-  
-  call();
-});
+
+
+if(type=='upbit'){
+  // second minute hour day-of-month month day-of-week
+  cron.schedule('* * * * *', function(){
+    call();
+  });
+}else{
+  exports.handler = call;
+}
+
