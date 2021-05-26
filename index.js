@@ -431,7 +431,7 @@ async function checkOrder() {
                 "'"
             );
             await connection.execute(
-              "UPDATE upbit_coin SET weight = weight+1 WHERE `market` = '" +
+              "UPDATE upbit_coin SET weight = weight+2 WHERE `market` = '" +
                 data[i].slug +
                 "'"
             );
