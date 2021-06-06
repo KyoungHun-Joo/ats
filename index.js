@@ -397,6 +397,7 @@ async function checkOrder() {
           data[i].buysellPrice
         );
 
+console.log(result.side,result.state,differentHours)
         if (result.state == "done") {
           const [leftValue, fileds] = await connection.execute(
             "SELECT value FROM variable WHERE `key` = '" + data[i].type + "' "
