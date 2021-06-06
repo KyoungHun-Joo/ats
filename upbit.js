@@ -120,7 +120,7 @@ UpbitAPI.prototype.cancel = async function(tradeId){
 
   var result = await this.request("/v1/orders",body,"DELETE");
 
-  return result.uuid;
+  return result;
 
 }
 UpbitAPI.prototype.useCoinInfo = async function(connection,minutes=1,count=200){

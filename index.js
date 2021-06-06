@@ -536,7 +536,7 @@ async function checkOrder() {
             rsiRes15[rsiRes15.length - 1] >= 0
               ? rsiRes15[rsiRes15.length - 1]
               : 0;
-
+console.log('test333')
           if(lastRSI15>72){
             const cancelRst = await upbit.cancel(result.uuid);
           }
