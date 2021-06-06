@@ -380,6 +380,7 @@ async function checkOrder() {
       if (data[i].type == "upbitMoney") {
         var result = await upbit.orderInfo(data[i].order_id);
         var nowPrice = await upbit.coinPrice(data[i].slug);
+        console.log('result',result)
         console.log(
           "now --",
           data[i].slug,
@@ -505,6 +506,11 @@ async function checkOrder() {
               data[i].id +
               "'"
           );
+
+        //구매 판매 확인 프로세스
+        }else{
+
+
         }
       } else {
         var result = await bithumb.xcoinApiCall("/info/order_detail", {
