@@ -380,7 +380,35 @@ async function checkOrder() {
       if (data[i].type == "upbitMoney") {
         var result = await upbit.orderInfo(data[i].order_id);
         var nowPrice = await upbit.coinPrice(data[i].slug);
-        console.log('result',result)
+
+        /*
+        { uuid: '8787e454-e2cf-4397-bd24-bc58583c17ce',
+        0|index  |   side: 'ask',
+        0|index  |   ord_type: 'limit',
+        0|index  |   price: '48730000.0',
+        0|index  |   state: 'wait',
+        0|index  |   market: 'KRW-BTC',
+        0|index  |   created_at: '2021-05-26T17:46:00+09:00',
+        0|index  |   volume: '0.0231',
+        0|index  |   remaining_volume: '0.0231',
+        0|index  |   reserved_fee: '0.0',
+        0|index  |   remaining_fee: '0.0',
+        0|index  |   paid_fee: '0.0',
+        0|index  |   locked: '0.0231',
+        0|index  |   executed_volume: '0.0',
+        0|index  |   trades_count: 0,
+        0|index  |   trades: [] }
+        */
+        var firstDate = new Date(result.created_at);
+        var secondDate = new Date();
+        var timeDifference = Math.abs(secondDate.getTime() - firstDate.getTime());
+        let differentDays = Math.ceil(timeDifference / (1000 * 3600 * 24));
+        let differentHours = Math.ceil(timeDifference / (1000 * 3600 ));
+
+        console.log('differentDays',differentDays);
+        console.log('differentHours',differentHours);
+
+        //if(result.side == "ask" && result.state=="wait")
         console.log(
           "now --",
           data[i].slug,
