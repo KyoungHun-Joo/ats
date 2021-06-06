@@ -536,9 +536,12 @@ async function checkOrder() {
             rsiRes15[rsiRes15.length - 1] >= 0
               ? rsiRes15[rsiRes15.length - 1]
               : 0;
-console.log('test333')
           if(lastRSI15>72){
+
             const cancelRst = await upbit.cancel(result.uuid);
+            priceData[0].trade_price,
+            await sell(data[i].type, data[i].lockAmount, priceData[0].trade_price, false, trade_slug, "upbit");
+
           }
 
         }
