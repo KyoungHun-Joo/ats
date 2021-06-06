@@ -521,7 +521,7 @@ async function checkOrder() {
 
         //구매 판매 확인 프로세스
         }else if(result.side == "ask" && result.state=="wait" && differentHours>5){
-          var coinInfo = await .coinInfo(3,trade_slug,200);
+          var coinInfo = await upbit.coinInfo(3,trade_slug,200);
 
           const priceData = cancelRst;
 
