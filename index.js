@@ -397,7 +397,7 @@ async function checkOrder() {
           data[i].buysellPrice
         );
 
-console.log(result.side,result.state,differentHours)
+
         if (result.state == "done") {
           const [leftValue, fileds] = await connection.execute(
             "SELECT value FROM variable WHERE `key` = '" + data[i].type + "' "
@@ -518,7 +518,9 @@ console.log(result.side,result.state,differentHours)
 
         //구매 판매 확인 프로세스
         }else if(result.side == "ask" && result.state=="wait" && differentHours>5){
+          console.log('test1')
           var coinInfo = await upbit.coinInfo(3,trade_slug,200);
+          console.log('tes2',coinInfo)
 
           const priceData = cancelRst;
 
@@ -530,6 +532,7 @@ console.log(result.side,result.state,differentHours)
           for (let j = priceData.length - 1; j >= 0; j--) {
             await inputRSI15.values.push(priceData[j].trade_price);
           }
+          console.log('test3')
 
           const rsiRes15 = await RSI.calculate(inputRSI15);
           const lastRSI15 =
