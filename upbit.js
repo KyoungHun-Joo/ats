@@ -190,16 +190,25 @@ UpbitAPI.prototype.request = async function(apiUrl,body,type,qs={}){
 				json: body
 			}
 
-		}else{
+		}else if(type=='POST'){
 
 			options = {
-				method: type,
+				method: "POST",
 				url: server_url + apiUrl,
 				headers: {Authorization: `Bearer ${token}`},
 				json: body
 			}
 
-		}
+		}else{
+
+			options = {
+				method: "DELETE",
+				url: server_url + apiUrl+"?" + query,
+				headers: {Authorization: `Bearer ${token}`},
+				json: body
+			}
+
+    }
 		result = await rp(options);
 
 	}catch(e){
