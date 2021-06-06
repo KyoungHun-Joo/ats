@@ -193,7 +193,7 @@ UpbitAPI.prototype.request = async function(apiUrl,body,type,qs={}){
 		}else{
 
 			options = {
-				method: "POST",
+				method: type,
 				url: server_url + apiUrl,
 				headers: {Authorization: `Bearer ${token}`},
 				json: body
