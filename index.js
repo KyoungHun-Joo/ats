@@ -518,7 +518,6 @@ async function checkOrder() {
 
         //구매 판매 확인 프로세스
         }else if(result.side == "ask" && result.state=="wait" && differentHours>5){
-          console.log('test1')
           var coinInfo = await upbit.coinInfo(3,trade_slug,200);
 
           const priceData = coinInfo;
@@ -531,7 +530,6 @@ async function checkOrder() {
           for (let j = priceData.length - 1; j >= 0; j--) {
             await inputRSI15.values.push(priceData[j].trade_price);
           }
-          console.log('test3')
 
           const rsiRes15 = await RSI.calculate(inputRSI15);
           const lastRSI15 =
@@ -539,10 +537,8 @@ async function checkOrder() {
               ? rsiRes15[rsiRes15.length - 1]
               : 0;
 
-          console.log('test',lastRSI15 )
           if(lastRSI15>72){
             const cancelRst = await upbit.cancel(result.uuid);
-
           }
 
         }
