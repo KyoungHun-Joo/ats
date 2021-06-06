@@ -520,9 +520,8 @@ async function checkOrder() {
         }else if(result.side == "ask" && result.state=="wait" && differentHours>5){
           console.log('test1')
           var coinInfo = await upbit.coinInfo(3,trade_slug,200);
-          console.log('tes2',coinInfo)
 
-          const priceData = cancelRst;
+          const priceData = coinInfo;
 
           var inputRSI15 = {
             values: [],
