@@ -377,28 +377,12 @@ async function checkOrder() {
       var trade_amount = 0;
       var trade_fee = 0;
       var trade_units = 0;
+      var trade_slug = data[i].slug;
+
       if (data[i].type == "upbitMoney") {
         var result = await upbit.orderInfo(data[i].order_id);
         var nowPrice = await upbit.coinPrice(data[i].slug);
 
-        /*
-        { uuid: '8787e454-e2cf-4397-bd24-bc58583c17ce',
-        0|index  |   side: 'ask',
-        0|index  |   ord_type: 'limit',
-        0|index  |   price: '48730000.0',
-        0|index  |   state: 'wait',
-        0|index  |   market: 'KRW-BTC',
-        0|index  |   created_at: '2021-05-26T17:46:00+09:00',
-        0|index  |   volume: '0.0231',
-        0|index  |   remaining_volume: '0.0231',
-        0|index  |   reserved_fee: '0.0',
-        0|index  |   remaining_fee: '0.0',
-        0|index  |   paid_fee: '0.0',
-        0|index  |   locked: '0.0231',
-        0|index  |   executed_volume: '0.0',
-        0|index  |   trades_count: 0,
-        0|index  |   trades: [] }
-        */
         var firstDate = new Date(result.created_at);
         var secondDate = new Date();
         var timeDifference = Math.abs(secondDate.getTime() - firstDate.getTime());
@@ -536,8 +520,29 @@ async function checkOrder() {
           );
 
         //구매 판매 확인 프로세스
-        }else{
+        }else if(result.side == "ask" && result.state=="wait" && differentHours>5){
+          var coinInfo = await .coinInfo(3,trade_slug,200);
 
+          const priceData = cancelRst;
+
+          var inputRSI15 = {
+            values: [],
+            period: 14,
+          };
+
+          for (let j = priceData.length - 1; j >= 0; j--) {
+            await inputRSI15.values.push(priceData[j].trade_price);
+          }
+
+          const rsiRes15 = await RSI.calculate(inputRSI15);
+          const lastRSI15 =
+            rsiRes15[rsiRes15.length - 1] >= 0
+              ? rsiRes15[rsiRes15.length - 1]
+              : 0;
+          if(lastRSI15>80){
+            const cancelRst = await upbit.cancel(result.uuid);
+
+          }
 
         }
       } else {
@@ -722,6 +727,9 @@ async function upbitTrade(connection) {
   const [upData, fields] = await connection.execute(
     "SELECT * FROM variable where `key` LIKE 'upbit%'"
   );
+  const [biteFlag, fileds] = await connection.execute(
+    "SELECT status FROM variable WHERE `key` = 'upbitBiteFlag' "
+  );
   var upbitData;
   var inputRSI15 = {
     values: [],
@@ -744,6 +752,7 @@ async function upbitTrade(connection) {
     if (valueStatus == 3) {
       var buyFlag = false;
       for (let i = 0; i < upbitData.length; i++) {
+
         inputRSI15.values = [];
         const market = upbitData[i].market;
         const priceData = upbitData[i].data;
@@ -753,12 +762,15 @@ async function upbitTrade(connection) {
           await inputRSI15.values.push(priceData[j].trade_price);
         }
         const rsiRes15 = await RSI.calculate(inputRSI15);
-        const lastRSI15 =
+        var lastRSI15 =
           rsiRes15[rsiRes15.length - 1] >= 0
             ? rsiRes15[rsiRes15.length - 1]
             : 0;
-        console.log("market", market, lastRSI15, priceData[0].trade_price);
 
+        if(biteFlag[0].status==1 && market != slug){
+          lastRSI15 -= 15;
+        }
+        console.log("market", market, lastRSI15, priceData[0].trade_price);
         if ((await upbitCompare(1, lastRSI15, 0, 0, weight)) && !buyFlag) {
           buyFlag = true;
           await buy(
