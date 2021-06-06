@@ -389,10 +389,6 @@ async function checkOrder() {
         let differentDays = Math.ceil(timeDifference / (1000 * 3600 * 24));
         let differentHours = Math.ceil(timeDifference / (1000 * 3600 ));
 
-        console.log('differentDays',differentDays);
-        console.log('differentHours',differentHours);
-
-        //if(result.side == "ask" && result.state=="wait")
         console.log(
           "now --",
           data[i].slug,
@@ -539,7 +535,9 @@ async function checkOrder() {
             rsiRes15[rsiRes15.length - 1] >= 0
               ? rsiRes15[rsiRes15.length - 1]
               : 0;
-          if(lastRSI15>80){
+
+          console.log('test',lastRSI15 )
+          if(lastRSI15>72){
             const cancelRst = await upbit.cancel(result.uuid);
 
           }
