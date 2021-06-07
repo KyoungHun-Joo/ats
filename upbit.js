@@ -117,7 +117,7 @@ UpbitAPI.prototype.cancel = async function(tradeId){
   const body = {
       uuid: tradeId
   }
-
+  console.log('cancel',tradeId)
   var result = await this.request("/v1/orders",body,"DELETE");
 
   return result;
