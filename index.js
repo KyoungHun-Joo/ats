@@ -348,7 +348,7 @@ async function checkOrder() {
     "SELECT * FROM trade_log WHERE status=0 AND order_id != '' "
   );
   const [biteFlag, fileds] = await connection.execute(
-    "SELECT status FROM variable WHERE `key` = 'upbitBiteFlag' "
+    "SELECT status, slug FROM variable WHERE `key` = 'upbitBiteFlag' "
   );
   
   if (!data) return;
@@ -528,7 +528,7 @@ async function checkOrder() {
 
             const cancelRst = await upbit.cancel(result.uuid);
             await connection.execute(
-              "UPDATE variable SET status = 1 WHERE `key` = 'upbitBiteFlag'"
+              "UPDATE variable SET slug = '"+trade_slug+"', status = 1 WHERE `key` = 'upbitBiteFlag'"
             );
             priceData[0].trade_price,
             await sell(data[i].type, data[i].lockAmount, priceData[0].trade_price, false, trade_slug, "upbit");
@@ -719,7 +719,7 @@ async function upbitTrade(connection) {
     "SELECT * FROM variable where `key` LIKE 'upbit%'"
   );
   const [biteFlag, fileds] = await connection.execute(
-    "SELECT status FROM variable WHERE `key` = 'upbitBiteFlag' "
+    "SELECT status, slug FROM variable WHERE `key` = 'upbitBiteFlag' "
   );
   var upbitData;
   var inputRSI15 = {
@@ -758,7 +758,7 @@ async function upbitTrade(connection) {
             ? rsiRes15[rsiRes15.length - 1]
             : 0;
 
-        if(biteFlag[0].status==1 && market != slug){
+        if(biteFlag[0].status==1 && market != biteFlag[0].slug){
           lastRSI15 += 15;
         }
         console.log("market", market, lastRSI15, priceData[0].trade_price);
