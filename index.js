@@ -387,7 +387,7 @@ async function checkOrder() {
 
           var trade_fee = 0;
           var trade_units = 0;
-
+          console.log('result',result)
           for (let j = 0; j < result.trades.length; j++) {
             trade_amount += Number(result.trades[j].funds);
             trade_units += Number(result.trades[j].volume);
