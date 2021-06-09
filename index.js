@@ -758,6 +758,7 @@ async function upbitTrade(connection) {
             ? rsiRes15[rsiRes15.length - 1]
             : 0;
 
+        console.log('bite',biteFlag[0].status,market,slug)
         if(biteFlag[0].status==1 && market != slug){
           lastRSI15 -= 15;
         }
