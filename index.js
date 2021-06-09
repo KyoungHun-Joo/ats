@@ -422,13 +422,14 @@ async function checkOrder() {
                 data[i].type +
                 "'"
             );
-            await connection.execute(
-              "UPDATE upbit_coin SET weight = weight+2 WHERE `market` = '" +
-                data[i].slug +
-                "'"
-            );
 
             if(biteFlag[0].status ==0){
+              await connection.execute(
+                "UPDATE upbit_coin SET weight = weight+2 WHERE `market` = '" +
+                  data[i].slug +
+                  "'"
+              );
+  
               await connection.execute(
                 "UPDATE upbit_coin SET weight = if(weight>0,weight -0.5,weight) WHERE `market` != '" +
                   data[i].slug +
@@ -768,7 +769,6 @@ async function upbitTrade(connection) {
 
         console.log("market", market, lastRSI15, priceData[0].trade_price, weight, CONFIG.LOW_POINT);
         if ((await upbitCompare(1, lastRSI15, 0, 0, weight)) && !buyFlag) {
-          console.log('buy', type, value, market)
           buyFlag = true;
           await buy(
             type,
