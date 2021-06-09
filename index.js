@@ -387,7 +387,7 @@ async function checkOrder() {
 
           var trade_fee = 0;
           var trade_units = 0;
-          console.log('result',result)
+
           for (let j = 0; j < result.trades.length; j++) {
             trade_amount += Number(result.trades[j].funds);
             trade_units += Number(result.trades[j].volume);
@@ -439,8 +439,7 @@ async function checkOrder() {
           } else if (result.side == "ask") {
 
             //다음 주문시 trade fee 미리 차감
-            trade_amount =
-              leftValue[0].value + trade_amount - trade_fee - trade_fee;
+            trade_amount = trade_amount - trade_fee - trade_fee;
             trade_amount = Math.floor(trade_amount);
 
             console.log(
