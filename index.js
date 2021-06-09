@@ -758,11 +758,8 @@ async function upbitTrade(connection) {
             ? rsiRes15[rsiRes15.length - 1]
             : 0;
 
-        console.log('bite',biteFlag[0].status,market,slug)
         if(biteFlag[0].status==1 && market != slug){
-          console.log('not bite',lastRSI15)
           lastRSI15 -= 15;
-          console.log('not bite',lastRSI15)
         }
         console.log("market", market, lastRSI15, priceData[0].trade_price);
         if ((await upbitCompare(1, lastRSI15, 0, 0, weight)) && !buyFlag) {
