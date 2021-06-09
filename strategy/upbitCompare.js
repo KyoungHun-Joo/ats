@@ -6,7 +6,7 @@ async function strategy(buySell, lastRSI,lastPrice, price,weight=0){
 
   //매수전
   if(buySell == 1){
-    if(lastRSI<=CONFIG.LOW_POINT+10-weight){
+    if(lastRSI<=CONFIG.LOW_POINT-weight){
       return true;
     }else{
       return false;

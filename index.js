@@ -719,7 +719,7 @@ async function upbitTrade(connection) {
     "SELECT * FROM variable where `key` LIKE 'upbit%'"
   );
   const [biteFlag, fileds] = await connection.execute(
-    "SELECT status, slug FROM variable WHERE `key` = 'upbitBiteFlag' "
+    "SELECT status, slug, weight FROM variable WHERE `key` = 'upbitBiteFlag' "
   );
   var upbitData;
   var inputRSI15 = {
@@ -758,9 +758,14 @@ async function upbitTrade(connection) {
             ? rsiRes15[rsiRes15.length - 1]
             : 0;
 
-        if(biteFlag[0].status==1 && market != biteFlag[0].slug){
-          lastRSI15 += 15;
+        if(biteFlag[0].status==1){
+          if(market != biteFlag[0].slug){
+            lastRSI15 += 15;
+          }else{
+            lastRSI15 -= biteFlag[0].weight;
+          }
         }
+
         console.log("market", market, lastRSI15, priceData[0].trade_price);
         if ((await upbitCompare(1, lastRSI15, 0, 0, weight)) && !buyFlag) {
           buyFlag = true;
