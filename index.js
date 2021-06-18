@@ -626,13 +626,7 @@ async function checkOrder() {
         }
       }
     } catch (e) {
-      await connection.execute(
-        "UPDATE trade_log SET statusStr = '" +
-          e.message +
-          "' WHERE `id` = '" +
-          data[i].id +
-          "'"
-      );
+      console.log('mysql error',e)
     }
   }
 }
