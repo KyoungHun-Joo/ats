@@ -360,7 +360,25 @@ async function checkOrder() {
       var trade_fee = 0;
       var trade_units = 0;
       var trade_slug = data[i].slug;
-
+      /*
+      result { uuid: '7597a297-7c2e-43dc-ac56-34849ecd3e38',
+      side: 'ask',
+      ord_type: 'limit',
+      price: '2939000.0',
+      state: 'cancel',
+      market: 'KRW-ETH',
+      created_at: '2021-06-16T17:27:00+09:00',
+      volume: '0.2703',
+      remaining_volume: '0.2703',
+      reserved_fee: '0.0',
+      remaining_fee: '0.0',
+      paid_fee: '0.0',
+      locked: '0.2703',
+      executed_volume: '0.0',
+      trades_count: 0,
+      trades: [] }
+      */
+    
       if (data[i].type == "upbitMoney") {
         var result = await upbit.orderInfo(data[i].order_id);
         var nowPrice = await upbit.coinPrice(data[i].slug);
@@ -368,7 +386,6 @@ async function checkOrder() {
         var firstDate = new Date(result.created_at);
         var secondDate = new Date();
         var timeDifference = Math.abs(secondDate.getTime() - firstDate.getTime());
-        let differentDays = Math.ceil(timeDifference / (1000 * 3600 * 24));
         let differentHours = Math.ceil(timeDifference / (1000 * 3600 ));
 
         console.log(
@@ -525,7 +542,7 @@ async function checkOrder() {
             rsiRes15[rsiRes15.length - 1] >= 0
               ? rsiRes15[rsiRes15.length - 1]
               : 0;
-          if(lastRSI15>72){
+          if(lastRSI15>75){
 
             const cancelRst = await upbit.cancel(result.uuid);
             await connection.execute(
@@ -596,6 +613,7 @@ async function checkOrder() {
           }
           return true;
         } else {
+          console.log('status str',result)
           await connection.execute(
             "UPDATE trade_log SET statusStr = '" +
               result.data.order_status +
