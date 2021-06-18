@@ -503,10 +503,7 @@ async function checkOrder() {
                 "'"
             );
             await connection.execute(
-              "UPDATE trade_log SET statusStr = '" +
-                result.state +
-                "', status =1 WHERE type="
-            );
+              "UPDATE trade_log SET statusStr = '" +result.state +"', status =1 WHERE type='"+data[i].type +"'");
           } else {
             await connection.execute(
               "UPDATE variable SET status = 3 WHERE `key` = '" +
