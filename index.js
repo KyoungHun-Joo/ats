@@ -5,8 +5,8 @@ const upbitCompare = require("./strategy/upbitCompare");
 const CONFIG = require("./config")();
 
 const mysql_dbc = require("./db_con")();
-const Bithumb = require("./bithumb");
-const UpbitAPI = require("./upbit");
+const Bithumb = require("./lib/bithumb");
+const UpbitAPI = require("./lib/upbit");
 
 const bithumb = new Bithumb();
 const upbit = new UpbitAPI();
