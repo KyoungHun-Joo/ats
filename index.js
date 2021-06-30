@@ -778,7 +778,7 @@ async function upbitTrade(connection) {
         }
 
         console.log("market", market, lastRSI15, priceData[0].trade_price, weight, CONFIG.LOW_POINT);
-        if ((await upbitCompare(1, lastRSI15, 0, 0, weight)) && !buyFlag) {
+        if ((await upbitCompare(1, lastRSI15, rsiRes15, 0, weight)) && !buyFlag) {
           buyFlag = true;
           await buy(
             type,
@@ -794,7 +794,7 @@ async function upbitTrade(connection) {
       var coinPrice = await upbit.coinPrice(slug);
       console.log("coinPrice", lockAmount, lastPrice, slug, coinPrice);
       //if(await upbitCompare(2,0,lastPrice,coinPrice)) await sell(type,lockAmount,coinPrice,false,slug,"upbit")
-      await sell(type, lockAmount, lastPrice * 1.009, false, slug, "upbit");
+      await sell(type, lockAmount, lastPrice * 1.011, false, slug, "upbit");
     }
   }
 }
