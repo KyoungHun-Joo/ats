@@ -344,12 +344,8 @@ async function compareRSI4(connection, priceArr, coinPrice) {
 async function expire() {}
 
 async function checkOrder() {
-  const [data, fields] = await connection.execute(
-    "SELECT * FROM trade_log WHERE status=0 AND order_id != '' "
-  );
-  const [biteFlag, fileds] = await connection.execute(
-    "SELECT status, slug FROM variable WHERE `key` = 'upbitBiteFlag' "
-  );
+  const [data, fields] = await connection.execute("SELECT * FROM trade_log WHERE status=0 AND order_id != '' ");
+  const [biteFlag, fileds] = await connection.execute("SELECT status, slug FROM variable WHERE `key` = 'upbitBiteFlag' ");
   
   if (!data) return;
 
@@ -379,250 +375,168 @@ async function checkOrder() {
       trades: [] }
       */
     
-      if (data[i].type == "upbitMoney") {
-        var result = await upbit.orderInfo(data[i].order_id);
-        var nowPrice = await upbit.coinPrice(data[i].slug);
+      var result = await upbit.orderInfo(data[i].order_id);
+      var nowPrice = await upbit.coinPrice(data[i].slug);
 
-        var firstDate = new Date(result.created_at);
-        var secondDate = new Date();
-        var timeDifference = Math.abs(secondDate.getTime() - firstDate.getTime());
-        let differentHours = Math.ceil(timeDifference / (1000 * 3600 ));
+      var firstDate = new Date(result.created_at);
+      var secondDate = new Date();
+      var timeDifference = Math.abs(secondDate.getTime() - firstDate.getTime());
+      let differentHours = Math.ceil(timeDifference / (1000 * 3600 ));
 
-        console.log(
-          "now --",
-          data[i].slug,
-          nowPrice,
-          " -> ",
-          data[i].buysellPrice
+      console.log("now --", data[i].slug,nowPrice," -> ",data[i].buysellPrice);
+
+      if (result.state == "done") {
+        const [leftValue, fileds] = await connection.execute(
+          "SELECT value FROM variable WHERE `key` = '" + data[i].type + "' "
         );
 
+        var trade_fee = 0;
+        var trade_units = 0;
 
-        if (result.state == "done") {
-          const [leftValue, fileds] = await connection.execute(
-            "SELECT value FROM variable WHERE `key` = '" + data[i].type + "' "
-          );
+        for (let j = 0; j < result.trades.length; j++) {
+          trade_amount += Number(result.trades[j].funds);
+          trade_units += Number(result.trades[j].volume);
+        }
+        trade_fee = result.paid_fee;
 
-          var trade_fee = 0;
-          var trade_units = 0;
-
-          for (let j = 0; j < result.trades.length; j++) {
-            trade_amount += Number(result.trades[j].funds);
-            trade_units += Number(result.trades[j].volume);
-          }
-          trade_fee = result.paid_fee;
-
+        await connection.execute(
+          "UPDATE trade_log SET statusStr = '" +
+            result.state +
+            "', status =1 ,price='" +
+            trade_amount +
+            "',lockAmount='" +
+            trade_units +
+            "',fee='" +
+            trade_fee +
+            "' WHERE `id` = '" +
+            data[i].id +
+            "'"
+        );
+        //구매완료
+        if (result.side == "bid") {
+          console.log("bid completed", trade_amount, leftValue, trade_fee);
+          var bidVal = Number(leftValue[0].value) - trade_amount;
           await connection.execute(
-            "UPDATE trade_log SET statusStr = '" +
-              result.state +
-              "', status =1 ,price='" +
-              trade_amount +
-              "',lockAmount='" +
+            "UPDATE variable SET status = 4,value='" +
+              bidVal +
+              "',lockAmount = '" +
               trade_units +
-              "',fee='" +
-              trade_fee +
-              "' WHERE `id` = '" +
-              data[i].id +
-              "'"
-          );
-          //구매완료
-          if (result.side == "bid") {
-            console.log("bid completed", trade_amount, leftValue, trade_fee);
-            var bidVal = Number(leftValue[0].value) - trade_amount;
-            await connection.execute(
-              "UPDATE variable SET status = 4,value='" +
-                bidVal +
-                "',lockAmount = '" +
-                trade_units +
-                "',lastPrice = '" +
-                result.price +
-                "' WHERE `key` = '" +
-                data[i].type +
-                "'"
-            );
-
-            if(biteFlag[0].status ==0){
-              await connection.execute(
-                "UPDATE upbit_coin SET weight = weight+2 WHERE `market` = '" +
-                  data[i].slug +
-                  "'"
-              );
-  
-              await connection.execute(
-                "UPDATE upbit_coin SET weight = if(weight>0,weight -0.5,weight) WHERE `market` != '" +
-                  data[i].slug +
-                  "'"
-              );
-            }
-
-          } else if (result.side == "ask") {
-
-            //다음 주문시 trade fee 미리 차감
-            trade_amount = trade_amount - trade_fee - trade_fee;
-            trade_amount = Math.floor(trade_amount);
-
-            console.log(
-              "ask completed",
-              trade_amount,
-              leftValue[0].value,
-              trade_fee
-            );
-            
-            await connection.execute(
-              "UPDATE variable SET status = 3,value = value + '" +
-                trade_amount +
-                "' WHERE `key` = '" +
-                data[i].type +
-                "'"
-            );
-          }
-        } else if (result.state == "cancel") {
-          const [status, fileds1] = await connection.execute(
-            "SELECT status FROM variable WHERE `key` = '" + data[i].type + "' "
-          );
-          const [trade, fileds2] = await connection.execute(
-            "SELECT type,slug,lockAmount,price FROM trade_log WHERE buysell=1 AND `type` = '" +
+              "',lastPrice = '" +
+              result.price +
+              "' WHERE `key` = '" +
               data[i].type +
-              "' ORDER BY id desc limit 1"
-          );
-          if (status[0].status == 1) {
-            var coinPrice = await upbit.coinPrice(trade[0].slug);
-
-            await sell(
-              trade[0].type,
-              trade[0].lockAmount,
-              coinPrice * 1.021,
-              false,
-              trade[0].slug,
-              "upbit"
-            );
-            await connection.execute(
-              "UPDATE variable SET status = 1,value = value+" +
-                trade[0].price +
-                " WHERE `key` = '" +
-                data[i].type +
-                "'"
-            );
-            
-            await connection.execute(
-              "UPDATE trade_log SET statusStr = '" +result.state +"', status =1 WHERE type='"+data[i].type +"'");
-          } else {
-            await connection.execute(
-              "UPDATE variable SET status = 3 WHERE `key` = '" +
-                data[i].type +
-                "'"
-            );
-          }
-          await connection.execute(
-            "UPDATE trade_log SET statusStr = '" +
-              result.state +
-              "', status =1 WHERE `id` = '" +
-              data[i].id +
               "'"
           );
 
-        //구매 판매 확인 프로세스
-        }else if(result.side == "ask" && result.state=="wait" && differentHours>5){
-          var coinInfo = await upbit.coinInfo(3,trade_slug,200);
-
-          const priceData = coinInfo;
-
-          var inputRSI15 = {
-            values: [],
-            period: 14,
-          };
-
-          for (let j = priceData.length - 1; j >= 0; j--) {
-            await inputRSI15.values.push(priceData[j].trade_price);
-          }
-
-          const rsiRes15 = await RSI.calculate(inputRSI15);
-          const lastRSI15 =
-            rsiRes15[rsiRes15.length - 1] >= 0
-              ? rsiRes15[rsiRes15.length - 1]
-              : 0;
-          if(lastRSI15>75){
-
-            const cancelRst = await upbit.cancel(result.uuid);
+          if(biteFlag[0].status ==0){
             await connection.execute(
-              "UPDATE variable SET slug = '"+trade_slug+"', status = 1 WHERE `key` = 'upbitBiteFlag'"
+              "UPDATE upbit_coin SET weight = weight+2 WHERE `market` = '" +
+                data[i].slug +
+                "'"
             );
-            priceData[0].trade_price,
-            await sell(data[i].type, data[i].lockAmount, priceData[0].trade_price, false, trade_slug, "upbit");
 
+            await connection.execute(
+              "UPDATE upbit_coin SET weight = if(weight>0,weight -0.5,weight) WHERE `market` != '" +
+                data[i].slug +
+                "'"
+            );
           }
 
-        }
-      } else {
-        var result = await bithumb.xcoinApiCall("/info/order_detail", {
-          order_currency: data[i].slug,
-          order_id: data[i].order_id,
-        });
+        } else if (result.side == "ask") {
 
-        result = JSON.parse(result);
+          //다음 주문시 trade fee 미리 차감
+          trade_amount = trade_amount - trade_fee - trade_fee;
+          trade_amount = Math.floor(trade_amount);
 
-        if (result.data.order_status == "Completed") {
-          const [leftValue, fileds] = await connection.execute(
-            "SELECT value FROM variable WHERE `key` = '" + data[i].type + "' "
+          console.log(
+            "ask completed",
+            trade_amount,
+            leftValue[0].value,
+            trade_fee
           );
-
-          for (let j = 0; j < result.data.contract.length; j++) {
-            trade_amount += Number(result.data.contract[j].total);
-            trade_fee += Number(result.data.contract[j].fee);
-            trade_units += Number(result.data.contract[j].units);
-          }
-
+          
           await connection.execute(
-            "UPDATE trade_log SET statusStr = '" +
-              result.data.order_status +
-              "', status =1 ,price='" +
+            "UPDATE variable SET status = 3,value = value + '" +
               trade_amount +
-              "',lockAmount='" +
-              trade_units +
-              "',fee='" +
-              trade_fee +
-              "' WHERE `id` = '" +
-              data[i].id +
+              "' WHERE `key` = '" +
+              data[i].type +
               "'"
           );
-          //구매완료
-          if (result.data.type == "bid") {
-            console.log("bid completed", trade_amount, leftValue, trade_fee);
-            var bidVal = Number(leftValue[0].value) - trade_amount + trade_fee;
-            await connection.execute(
-              "UPDATE variable SET status = 4,value='" +
-                bidVal +
-                "',lockAmount = '" +
-                trade_units +
-                "' WHERE `key` = '" +
-                data[i].type +
-                "'"
-            );
-          } else if (result.data.type == "ask") {
-            console.log("ask completed", trade_amount, leftValue, trade_fee);
-
-            trade_amount = trade_amount - trade_fee;
-            await connection.execute(
-              "UPDATE variable SET status = 3,value = '" +
-                trade_amount +
-                "' WHERE `key` = '" +
-                data[i].type +
-                "'"
-            );
-          }
-          return true;
-        } else {
-          console.log('status str',result)
-          await connection.execute(
-            "UPDATE trade_log SET statusStr = '" +
-              result.data.order_status +
-              "' WHERE `id` = '" +
-              data[i].id +
-              "'"
-          );
-
-          return false;
         }
+      } else if (result.state == "cancel") {
+        const [status, fileds1] = await connection.execute(
+          "SELECT status FROM variable WHERE `key` = '" + data[i].type + "' "
+        );
+        const [trade, fileds2] = await connection.execute(
+          "SELECT type,slug,lockAmount,price FROM trade_log WHERE buysell=1 AND `type` = '" +
+            data[i].type +
+            "' ORDER BY id desc limit 1"
+        );
+        if (status[0].status == 1) {
+          var coinPrice = await upbit.coinPrice(trade[0].slug);
+
+          await sell(
+            trade[0].type,
+            trade[0].lockAmount,
+            coinPrice * 1.021,
+            false,
+            trade[0].slug,
+            "upbit"
+          );
+          await connection.execute(
+            "UPDATE variable SET status = 1,value = value+" +
+              trade[0].price +
+              " WHERE `key` = '" +
+              data[i].type +
+              "'"
+          );
+          
+          await connection.execute(
+            "UPDATE trade_log SET statusStr = '" +result.state +"', status =1 WHERE type='"+data[i].type +"'");
+        } else {
+          await connection.execute( "UPDATE variable SET status = 3 WHERE `key` = '"+data[i].type +"'");
+        }
+        await connection.execute(
+          "UPDATE trade_log SET statusStr = '" +
+            result.state +
+            "', status =1 WHERE `id` = '" +
+            data[i].id +
+            "'"
+        );
+
+      //구매 판매 확인 프로세스
+      }else if(result.side == "ask" && result.state=="wait" && differentHours>5){
+        var coinInfo = await upbit.coinInfo(3,trade_slug,200);
+
+        const priceData = coinInfo;
+
+        var inputRSI15 = {
+          values: [],
+          period: 14,
+        };
+
+        for (let j = priceData.length - 1; j >= 0; j--) {
+          await inputRSI15.values.push(priceData[j].trade_price);
+        }
+
+        const rsiRes15 = await RSI.calculate(inputRSI15);
+        const lastRSI15 =
+          rsiRes15[rsiRes15.length - 1] >= 0
+            ? rsiRes15[rsiRes15.length - 1]
+            : 0;
+        if(lastRSI15>75){
+
+          const cancelRst = await upbit.cancel(result.uuid);
+          await connection.execute(
+            "UPDATE variable SET slug = '"+trade_slug+"', status = 1 WHERE `key` = 'upbitBiteFlag'"
+          );
+          priceData[0].trade_price,
+          await sell(data[i].type, data[i].lockAmount, priceData[0].trade_price, false, trade_slug, "upbit");
+
+        }
+
       }
+    
     } catch (e) {
       console.log('mysql error',e)
     }

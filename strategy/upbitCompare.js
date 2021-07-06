@@ -9,9 +9,6 @@ async function strategy(buySell, rsiRes,lastPrice, price,weight=0){
 
   //매수전
   if(buySell == 1){
-    console.log('lastRSI',lastRSI)
-    console.log('rsiRes[rsiRes.length - 2]',rsiRes[rsiRes.length - 2],rsiRes[rsiRes.length - 1])
-
     if(lastRSI<=CONFIG.LOW_POINT-weight && rsiRes[rsiRes.length - 2]<rsiRes[rsiRes.length - 1]){
       return true;
     }else{
