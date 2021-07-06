@@ -778,7 +778,7 @@ async function upbitTrade(connection) {
         }
 
         console.log("market", market, lastRSI15, priceData[0].trade_price, weight, CONFIG.LOW_POINT);
-        if ((await upbitCompare(1, rsiRes15, priceData[0].trade_price,, 0, weight)) && !buyFlag) {
+        if ((await upbitCompare(1, rsiRes15, priceData[0].trade_price, 0, weight)) && !buyFlag) {
           buyFlag = true;
           await buy(
             type,
