@@ -771,7 +771,8 @@ async function upbitTrade(connection) {
 
         if(biteFlag[0].status==1){
           if(market != biteFlag[0].slug){
-            lastRSI15 += 15;
+            rsiRes15[rsiRes15.length - 1] += 15;
+            lastRSI15 = rsiRes15[rsiRes15.length - 1];
           }else{
             lastRSI15 -= biteFlag[0].weight;
           }
