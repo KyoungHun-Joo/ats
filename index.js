@@ -341,7 +341,7 @@ async function checkOrder() {
           console.log("bid completed", trade_amount, leftValue, trade_fee);
           var bidVal = Number(leftValue[0].value) - trade_amount;
           await connection.execute(` UPDATE variable SET status = 4,value='${bidVal}',lockAmount = '${trade_units}',`+
-                                   ` lastPrice = '${result.price}' WHERE \`key\` = '${data[i].type}'"`);
+                                   ` lastPrice = '${result.price}' WHERE \`key\` = '${data[i].type}'`);
 
           if(biteFlag[0].status ==0){
             await connection.execute(`UPDATE upbit_coin SET weight = weight+2 WHERE \`market\` = '${data[i].slug}'` );
