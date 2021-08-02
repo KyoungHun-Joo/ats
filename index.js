@@ -161,8 +161,6 @@ async function sell(
 
   if (order_id) {
     await connection.execute(` UPDATE variable SET status=1, lockAmount = 0 WHERE \`key\` = '${type}'`);
-    console.log('test',` INSERT INTO trade_log (\`type\`, \`price\`, \`lockAmount\`, \`buysell\`, \`buysellPrice\`, \`order_id\`, \`slug\`) VALUES `
-    ` ('${type}', '${value}', '${lockAmount}',2,'${coinPrice}','${order_id}','${slug}') `)
 
     await connection.query(
       "INSERT INTO trade_log (type, price, lockAmount, buysell,buysellPrice, order_id,slug) VALUES ('" +
