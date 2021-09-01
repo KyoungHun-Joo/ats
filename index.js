@@ -408,10 +408,12 @@ async function checkOrder() {
         for (let j = coinInfo.length - 1; j >= 0; j--) {
           await inputRSI15.values.push(coinInfo[j].trade_price);
         }
-        console.log(lastRSI15, coinInfo[0].trade_price, result.buysellPrice*0.99)
-/*
+
         const rsiRes15 = await RSI.calculate(inputRSI15);
         const lastRSI15 = (rsiRes15[rsiRes15.length - 1] >= 0)? rsiRes15[rsiRes15.length - 1] : 0;
+        console.log(lastRSI15, coinInfo[0].trade_price, result.buysellPrice*0.99)
+
+        /*
         if(lastRSI15>75 && coinInfo[0].trade_price > result.buysellPrice*0.99){
 
           const cancelRst = await upbit.cancel(result.uuid);
