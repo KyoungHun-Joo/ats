@@ -399,7 +399,6 @@ async function checkOrder() {
 
       //구매 판매 확인 프로세스
       }else if(result.side == "ask" && result.state=="wait" && differentHours>5){
-        /*
         const coinInfo = await upbit.coinInfo(3,trade_slug,200);
         var inputRSI15 = {
           values: [],
@@ -409,21 +408,22 @@ async function checkOrder() {
         for (let j = coinInfo.length - 1; j >= 0; j--) {
           await inputRSI15.values.push(coinInfo[j].trade_price);
         }
-
+        console.log(lastRSI15, coinInfo[0].trade_price, result.buysellPrice*0.99)
+/*
         const rsiRes15 = await RSI.calculate(inputRSI15);
         const lastRSI15 = (rsiRes15[rsiRes15.length - 1] >= 0)? rsiRes15[rsiRes15.length - 1] : 0;
-        if(lastRSI15>75){
+        if(lastRSI15>75 && coinInfo[0].trade_price > result.buysellPrice*0.99){
 
           const cancelRst = await upbit.cancel(result.uuid);
           await connection.execute(
             "UPDATE variable SET slug = '"+trade_slug+"', status = 1 WHERE `key` = 'upbitBiteFlag'"
           );
-          coinInfo[0].trade_price,
+          
           await sell(data[i].type, data[i].lockAmount, coinInfo[0].trade_price, false, trade_slug, "upbit");
 
         }
-        */
-
+        
+*/
       }
     
     } catch (e) {
