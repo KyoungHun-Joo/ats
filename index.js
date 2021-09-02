@@ -332,7 +332,7 @@ async function checkOrder() {
       let differentMin = Math.ceil(timeDifference / (1000 * 600 ));
       let differentHours = Math.ceil(timeDifference / (1000 * 3600 ));
 
-      console.log("waitting "+differentMin+"min now --", data[i].slug,nowPrice," -> ",data[i].buysellPrice, 'if not sell '+result.price *0.995);
+      console.log("waitting "+differentMin+"min now --", data[i].slug,nowPrice," -> ",data[i].buysellPrice, 'if not sell '+result.price *0.994);
 
       //완료
       if (result.state == "done") {
@@ -412,9 +412,9 @@ async function checkOrder() {
 
         const rsiRes15 = await RSI.calculate(inputRSI15);
         const lastRSI15 = (rsiRes15[rsiRes15.length - 1] >= 0)? rsiRes15[rsiRes15.length - 1] : 0;
-        console.log('sell?!', lastRSI15, coinInfo[0].trade_price, result.price *0.995)
+        console.log('sell?!', lastRSI15, coinInfo[0].trade_price, result.price *0.994)
 
-        if(lastRSI15>75 && coinInfo[0].trade_price > result.buysellPrice*0.995){
+        if(lastRSI15>75 && coinInfo[0].trade_price > result.buysellPrice*0.994){
 
           const cancelRst = await upbit.cancel(result.uuid);
           console.log('cancelRst',cancelRst);
