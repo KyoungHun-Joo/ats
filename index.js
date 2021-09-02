@@ -1,5 +1,3 @@
-process.env.TZ = "Asia/Seoul";
-
 const rsiCompare1 = require("./strategy/rsiCompare1");
 const upbitCompare = require("./strategy/upbitCompare");
 const CONFIG = require("./config")();
@@ -329,6 +327,7 @@ async function checkOrder() {
       var firstDate = new Date(result.created_at);
       var secondDate = new Date();
       var timeDifference = Math.abs(secondDate.getTime() - firstDate.getTime());
+      console.log('timeDifference',timeDifference)
       let differentMin = Math.ceil(timeDifference / (1000 * 600 ));
       let differentHours = Math.ceil(timeDifference / (1000 * 3600 ));
 
