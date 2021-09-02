@@ -331,7 +331,7 @@ async function checkOrder() {
       var timeDifference = Math.abs(secondDate.getTime() - firstDate.getTime());
       let differentHours = Math.ceil(timeDifference / (1000 * 3600 ));
 
-      console.log("now --", data[i].slug,nowPrice," -> ",data[i].buysellPrice);
+      console.log("now --", data[i].slug,nowPrice," -> ",data[i].buysellPrice, 'if not sell',result.price *0.992);
 
       //완료
       if (result.state == "done") {
