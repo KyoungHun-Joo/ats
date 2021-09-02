@@ -332,7 +332,7 @@ async function checkOrder() {
       let differentMin = Math.ceil(timeDifference / (1000 * 600 ));
       let differentHours = Math.ceil(timeDifference / (1000 * 3600 ));
 
-      console.log("waitting "+differentMin+"min now --", data[i].slug,nowPrice," -> ",data[i].buysellPrice, 'if not sell');
+      console.log("waitting "+differentMin+"min now --", data[i].slug,nowPrice," -> ",data[i].buysellPrice, 'if not sell '+result.price *0.995);
 
       //완료
       if (result.state == "done") {
