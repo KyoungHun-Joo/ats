@@ -329,9 +329,10 @@ async function checkOrder() {
       var firstDate = new Date(result.created_at);
       var secondDate = new Date();
       var timeDifference = Math.abs(secondDate.getTime() - firstDate.getTime());
+      let differentMin = Math.ceil(timeDifference / (1000 * 600 ));
       let differentHours = Math.ceil(timeDifference / (1000 * 3600 ));
 
-      console.log("now --", data[i].slug,nowPrice," -> ",data[i].buysellPrice, 'if not sell',result.price *0.992);
+      console.log("waitting "+differentMin+"min now --", data[i].slug,nowPrice," -> ",data[i].buysellPrice, 'if not sell');
 
       //완료
       if (result.state == "done") {
@@ -411,21 +412,21 @@ async function checkOrder() {
 
         const rsiRes15 = await RSI.calculate(inputRSI15);
         const lastRSI15 = (rsiRes15[rsiRes15.length - 1] >= 0)? rsiRes15[rsiRes15.length - 1] : 0;
-        console.log(lastRSI15, coinInfo[0].trade_price, result.price *0.992)
+        console.log('sell?!', lastRSI15, coinInfo[0].trade_price, result.price *0.995)
 
-        /*
-        if(lastRSI15>75 && coinInfo[0].trade_price > result.buysellPrice*0.99){
+        if(lastRSI15>75 && coinInfo[0].trade_price > result.buysellPrice*0.995){
 
           const cancelRst = await upbit.cancel(result.uuid);
+          console.log('cancelRst',cancelRst);
           await connection.execute(
             "UPDATE variable SET slug = '"+trade_slug+"', status = 1 WHERE `key` = 'upbitBiteFlag'"
           );
+          console.log(data[i].type, data[i].lockAmount, coinInfo[0].trade_price, false, trade_slug, "upbit");
           
           await sell(data[i].type, data[i].lockAmount, coinInfo[0].trade_price, false, trade_slug, "upbit");
 
         }
-        
-*/
+
       }
     
     } catch (e) {
