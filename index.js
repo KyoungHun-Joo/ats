@@ -412,7 +412,7 @@ async function checkOrder() {
         const rsiRes15 = await RSI.calculate(inputRSI15);
         const lastRSI15 = (rsiRes15[rsiRes15.length - 1] >= 0)? rsiRes15[rsiRes15.length - 1] : 0;
 
-        if(lastRSI15>75 && coinInfo[0].trade_price > result.buysellPrice*0.993){
+        if(lastRSI15>75 && coinInfo[0].trade_price > result.buysellPrice*0.995){
 
           const cancelRst = await upbit.cancel(result.uuid);
           console.log('cancelRst',cancelRst);
