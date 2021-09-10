@@ -56,14 +56,11 @@ async function buy(
   coinPrice,
   test = false,
   slug = "ETH",
-  platform = "bithumb"
+  platform = "upbit"
 ) {
-  if (platform == "upbit") {
-    coinPrice = await upbit.converPrice(coinPrice);
-    var lockAmount = Math.floor((amount / coinPrice) * 10000) / 10000;
-  } else {
-    var lockAmount = Math.floor((amount / coinPrice) * 1000) / 1000;
-  }
+  coinPrice = await upbit.converPrice(coinPrice);
+  var lockAmount = Math.floor((amount / coinPrice) * 10000) / 10000;
+
   amount -= lockAmount * coinPrice;
 
   if (amount < 0) amount = 0;
@@ -90,16 +87,9 @@ async function buy(
         "',1)"
     );
   } else {
-    if (platform == "upbit") {
-      var order_id = await upbit.trade("bid", slug, coinPrice, lockAmount);
-      console.log("order id", order_id);
-    } else {
-      lockAmount *= 0.99;
-      lockAmount = Math.floor(lockAmount * 1000) / 1000;
-
-      var order_id = await bithumb.call("buy", coinPrice, lockAmount, slug);
-    }
-
+    var order_id = await upbit.trade("bid", slug, coinPrice, lockAmount);
+    console.log("order id", order_id);
+ 
     if (order_id) {
       await connection.execute(
         "UPDATE variable SET status=2, slug='" +
@@ -331,7 +321,7 @@ async function checkOrder() {
       let differentMin = Math.ceil(timeDifference / (1000 * 60 ));
       let differentHours = Math.ceil(timeDifference / (1000 * 3600 ));
 
-      console.log("waitting "+differentMin+"min now --", data[i].slug,nowPrice," -> ",data[i].buysellPrice, 'if not sell '+result.price *0.994);
+      console.log("waitting "+differentMin+"min now --", data[i].slug,nowPrice," -> ",data[i].buysellPrice, 'if not sell '+result.price *0.995);
 
       //완료
       if (result.state == "done") {
@@ -411,8 +401,8 @@ async function checkOrder() {
 
         const rsiRes15 = await RSI.calculate(inputRSI15);
         const lastRSI15 = (rsiRes15[rsiRes15.length - 1] >= 0)? rsiRes15[rsiRes15.length - 1] : 0;
-
-        if(lastRSI15>75 && coinInfo[0].trade_price > result.buysellPrice*0.995){
+        if('판매 대기중',lastRSI15, coinInfo[0].trade_price, result.buysellPrice*0.996)
+        if(lastRSI15>75 && coinInfo[0].trade_price > result.buysellPrice*0.996){
 
           const cancelRst = await upbit.cancel(result.uuid);
           console.log('cancelRst',cancelRst);
@@ -466,6 +456,14 @@ async function upbitTrade(connection) {
 
     if (valueStatus == 3) {
       var buyFlag = false;
+      var buyItem = {
+        type:type,
+        value:value,
+        trade_price:"0",
+        market: "",
+        rsi:"0"
+      };
+
       for (let i = 0; i < upbitData.length; i++) {
 
         inputRSI15.values = [];
@@ -494,15 +492,24 @@ async function upbitTrade(connection) {
         console.log("market", market, lastRSI15, priceData[0].trade_price, weight, CONFIG.LOW_POINT);
         if ((await upbitCompare(1, rsiRes15, priceData[0].trade_price, 0, weight)) && !buyFlag) {
           buyFlag = true;
-          await buy(
-            type,
-            value,
-            priceData[0].trade_price,
-            false,
-            market,
-            "upbit"
-          );
+          if(buyItem.rsi>rsiRes15-weight){
+            buyItem.market = market;
+            buyItem.rsi = rsiRes15;
+            buyItem.trade_price = priceData[0].trade_price
+          }
+
         }
+      }
+
+      if(buyFlag){
+
+        await buy(
+          type,
+          value,
+          buyItem.trade_price,
+          false,
+          buyItem.market
+        );
       }
     } else if (valueStatus == 4) {
       var coinPrice = await upbit.coinPrice(slug);
