@@ -460,9 +460,9 @@ async function upbitTrade(connection) {
       var buyItem = {
         type:type,
         value:value,
-        trade_price:"0",
+        trade_price:0,
         market: "",
-        rsi:"100"
+        rsi:100
       };
 
       for (let i = 0; i < upbitData.length; i++) {
