@@ -436,8 +436,6 @@ async function upbitTrade(connection) {
     "SELECT status, slug, weight FROM variable WHERE `key` = 'upbitBiteFlag' "
   );
 
-  return console.log('test');
-  return;
   var upbitData;
   var inputRSI15 = {
     values: [],
@@ -525,7 +523,6 @@ async function upbitTrade(connection) {
 
 async function call(event, context, callback) {
   //mailService('test')
-  console.log('111')
   const cmc_key = getCmcKey();
   connection = await mysql_dbc.init();
 
