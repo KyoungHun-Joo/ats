@@ -503,7 +503,7 @@ async function upbitTrade(connection) {
       }
 
       if(buyFlag){
-
+        console.log('buyITem',buyItem)
         await buy(
           type,
           value,
