@@ -435,6 +435,8 @@ async function upbitTrade(connection) {
   const [biteFlag, fileds] = await connection.execute(
     "SELECT status, slug, weight FROM variable WHERE `key` = 'upbitBiteFlag' "
   );
+
+  return console.log('test')
   var upbitData;
   var inputRSI15 = {
     values: [],
