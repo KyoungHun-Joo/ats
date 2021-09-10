@@ -453,15 +453,15 @@ async function upbitTrade(connection) {
     const value = upData[x].value;
     const lockAmount = upData[x].lockAmount;
     const type = upData[x].key;
+    var buyFlag = false;
 
     if (valueStatus == 3) {
-      var buyFlag = false;
       var buyItem = {
         type:type,
         value:value,
         trade_price:"0",
         market: "",
-        rsi:"0"
+        rsi:"100"
       };
 
       for (let i = 0; i < upbitData.length; i++) {
