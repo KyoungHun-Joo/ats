@@ -282,9 +282,9 @@ async function compareRSI4(connection, priceArr, coinPrice) {
 async function checkOrder() {
   const [data, fields] = await connection.execute("SELECT * FROM trade_log WHERE status=0 AND order_id != '' ");
   const [biteFlag, fileds] = await connection.execute("SELECT status, slug FROM variable WHERE `key` = 'upbitBiteFlag' ");
-  
-  if (!data) return;
 
+  if (!data) return;
+  var upbitCoinData = {};
   for (let i = 0; i < data.length; i++) {
     if (!data[i].order_id) return;
     try {
@@ -313,7 +313,7 @@ async function checkOrder() {
     
       var result = await upbit.orderInfo(data[i].order_id);
       var nowPrice = await upbit.coinPrice(data[i].slug);
-
+      
       var firstDate = new Date(result.created_at);
       var secondDate = new Date();
       var timeDifference = Math.abs(secondDate.getTime() - firstDate.getTime());
@@ -390,6 +390,7 @@ async function checkOrder() {
 
       //구매 판매 확인 프로세스
       }else if(result.side == "ask" && result.state=="wait" && differentHours>1){
+        /*
         const coinInfo = await upbit.coinInfo(3,trade_slug,200);
         var inputRSI15 = {
           values: [],
@@ -415,6 +416,7 @@ async function checkOrder() {
           await sell(data[i].type, data[i].lockAmount, coinInfo[0].trade_price, false, trade_slug, "upbit");
 
         }
+        */
 
       }else if(result.side == "bid" && result.state=="wait" && differentHours>1){
 
