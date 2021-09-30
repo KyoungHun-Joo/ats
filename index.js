@@ -377,7 +377,7 @@ async function checkOrder() {
         if (status[0].status == 1) {
           var coinPrice = await upbit.coinPrice(trade[0].slug);
 
-          await sell( trade[0].type, trade[0].lockAmount, coinPrice * 1.0045, false, trade[0].slug, "upbit" );
+          await sell( trade[0].type, trade[0].lockAmount, coinPrice * 1.0035, false, trade[0].slug, "upbit" );
           await connection.execute(` UPDATE variable SET status = 1,value = value+${trade[0].price} WHERE \`key\` = '${data[i].type}'` );
           await connection.execute(` UPDATE trade_log SET statusStr = '${result.state}', status =1 WHERE type='${data[i].type}'` );
         
@@ -448,7 +448,7 @@ async function upbitTrade(connection) {
   for (let x = 0; x < upData.length; x++) {
     if (upData[x].status == 3) getCoin = true;
   }
-  if (getCoin) upbitData = await upbit.useCoinInfo(connection, 3, 100);
+  if (getCoin) upbitData = await upbit.useCoinInfo(connection, 5, 100);
 
   for (let x = 0; x < upData.length; x++) {
     const valueStatus = upData[x].status;
@@ -520,7 +520,7 @@ async function upbitTrade(connection) {
       var coinPrice = await upbit.coinPrice(slug);
       console.log("coinPrice", lockAmount, lastPrice, slug, coinPrice);
       //if(await upbitCompare(2,0,lastPrice,coinPrice)) await sell(type,lockAmount,coinPrice,false,slug,"upbit")
-      await sell(type, lockAmount, lastPrice * 1.0045, false, slug, "upbit");
+      await sell(type, lockAmount, lastPrice * 1.0035, false, slug, "upbit");
     }
   }
 }

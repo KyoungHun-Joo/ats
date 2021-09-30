@@ -5,11 +5,15 @@ const CONFIG = require('../config')();
 async function strategy(buySell, rsiRes,lastPrice, price,weight=0){
 
   var lastRSI = (rsiRes[rsiRes.length - 1] >= 0)? rsiRes[rsiRes.length - 1] : 0;
+  var lastRSI2 = (rsiRes[rsiRes.length - 2] >= 0)? rsiRes[rsiRes.length - 2] : 0;
+  var lastRSI3 = (rsiRes[rsiRes.length - 3] >= 0)? rsiRes[rsiRes.length - 3] : 0;
+  var lastRSI4 = (rsiRes[rsiRes.length - 4] >= 0)? rsiRes[rsiRes.length - 4] : 0;
 
-
+  var lowPoint = CONFIG.LOW_POINT-weight
+  console.log('test1',lastRSI4, lastRSI3, lastRSI2, lastRSI)
   //매수전
   if(buySell == 1){
-    if(lastRSI<=CONFIG.LOW_POINT-weight && rsiRes[rsiRes.length - 2]<rsiRes[rsiRes.length - 1]){
+    if(lastRSI<=lowPoint && (lastRSI4>=lastRSI3) && (lastRSI3>=lastRSI2) &&lastRSI2<lastRSI){
       return true;
     }else{
       return false;
