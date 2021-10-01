@@ -356,7 +356,7 @@ async function checkOrder() {
         } else if (result.side == "ask") {
 
           //다음 주문시 trade fee 미리 차감
-          trade_amount = trade_amount - trade_fee ;
+          trade_amount = trade_amount - trade_fee- trade_fee ;
           trade_amount = Math.floor(trade_amount);
 
           console.log("ask completed", trade_amount, leftValue[0].value, trade_fee);
@@ -520,7 +520,7 @@ async function upbitTrade(connection) {
       var coinPrice = await upbit.coinPrice(slug);
       console.log("coinPrice", lockAmount, lastPrice, slug, coinPrice);
       //if(await upbitCompare(2,0,lastPrice,coinPrice)) await sell(type,lockAmount,coinPrice,false,slug,"upbit")
-      await sell(type, lockAmount, lastPrice * 1.0035, false, slug, "upbit");
+      await sell(type, lockAmount, lastPrice * 1.0045, false, slug, "upbit");
     }
   }
 }
