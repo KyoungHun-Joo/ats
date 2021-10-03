@@ -322,7 +322,7 @@ async function checkOrder() {
       let differentHours = Math.ceil(timeDifference / (1000 * 3600 ));
 
       console.log("waitting "+differentMin+"min now --", data[i].slug,nowPrice," -> ",data[i].buysellPrice);
-      console.log('test',result.side,result.state,differentHours)
+      console.log('test',result.side,result.state,differentHours,result.side == "ask", result.state=="wait",differentHours>1)
 
       //완료
       if (result.state == "done") {
@@ -390,7 +390,7 @@ async function checkOrder() {
 
       //구매 판매 확인 프로세스
       }else if(result.side == "ask" && result.state=="wait" && differentHours>1){
-        
+
         if(result.type=="upbitMoney"){
           console.log('판매 대기중', coinInfo[0].trade_price, result.buysellPrice*0.996)
 
