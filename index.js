@@ -389,7 +389,7 @@ async function checkOrder() {
 
       //구매 판매 확인 프로세스
       }else if(result.side == "ask" && result.state=="wait" && differentHours>1){
-
+/*
         if(data[i].type=="upbitMoney"){
           console.log('판매 대기중', nowPrice, result.buysellPrice*0.996)
 
@@ -406,7 +406,7 @@ async function checkOrder() {
           await sell(data[i].type, data[i].lockAmount, nowPrice, false, trade_slug, "upbit");
 
         }
-      
+      */
 
       }else if(result.side == "bid" && result.state=="wait" && differentHours>1){
 
