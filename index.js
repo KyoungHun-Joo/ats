@@ -390,7 +390,7 @@ async function checkOrder() {
 
       //구매 판매 확인 프로세스
       }else if(result.side == "ask" && result.state=="wait" && differentHours>1){
-
+console.log('in ask wait',result.type)
         if(result.type=="upbitMoney"){
           console.log('판매 대기중', coinInfo[0].trade_price, result.buysellPrice*0.996)
 
