@@ -390,12 +390,12 @@ async function checkOrder() {
 
       //구매 판매 확인 프로세스
       }else if(result.side == "ask" && result.state=="wait" && differentHours>1){
-console.log('in ask wait',result,data[i])
-        if(result.type=="upbitMoney"){
+
+        if(data[i].type=="upbitMoney"){
           console.log('판매 대기중', coinInfo[0].trade_price, result.buysellPrice*0.996)
 
         }
-        if(result.type=="upbitMoney" && coinInfo[0].trade_price > result.buysellPrice*0.996){
+        if(data[i].type=="upbitMoney" && coinInfo[0].trade_price > result.buysellPrice*0.996){
 
           const cancelRst = await upbit.cancel(result.uuid);
           console.log('cancelRst',cancelRst);
