@@ -445,8 +445,10 @@ async function upbitTrade(connection) {
     period: 14,
   };
   var getCoin = false;
+  var boughtItem = [];
   for (let x = 0; x < upData.length; x++) {
     if (upData[x].status == 3) getCoin = true;
+    if (upData[x].status != 3 && upData[x].slug!="") boughtItem.push(upData[x].slug)
   }
   if (getCoin) upbitData = await upbit.useCoinInfo(connection, 5, 100);
 
@@ -496,8 +498,7 @@ async function upbitTrade(connection) {
         console.log("market", market, lastRSI15, priceData[0].trade_price, weight, CONFIG.LOW_POINT);
         if ((await upbitCompare(1, rsiRes15, priceData[0].trade_price, 0, weight))) {
           buyFlag = true;
-          if(buyItem.rsi>lastRSI15){
-            console.log('buyitem2',market,lastRSI15, priceData[0].trade_price)
+          if(buyItem.rsi>lastRSI15 && !boughtItem.includes(market)){
             buyItem.market = market;
             buyItem.rsi = lastRSI15;
             buyItem.trade_price = priceData[0].trade_price
