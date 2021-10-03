@@ -322,7 +322,6 @@ async function checkOrder() {
       let differentHours = Math.ceil(timeDifference / (1000 * 3600 ));
 
       console.log("waitting "+differentMin+"min now --", data[i].slug,nowPrice," -> ",data[i].buysellPrice);
-      console.log('test',result.side,result.state,differentHours,result.side == "ask", result.state=="wait",differentHours>1)
 
       //완료
       if (result.state == "done") {
@@ -392,19 +391,19 @@ async function checkOrder() {
       }else if(result.side == "ask" && result.state=="wait" && differentHours>1){
 
         if(data[i].type=="upbitMoney"){
-          console.log('판매 대기중', coinInfo[0].trade_price, result.buysellPrice*0.996)
+          console.log('판매 대기중', nowPrice, result.buysellPrice*0.996)
 
         }
-        if(data[i].type=="upbitMoney" && coinInfo[0].trade_price > result.buysellPrice*0.996){
+        if(data[i].type=="upbitMoney" && nowPrice > result.buysellPrice*0.996){
 
           const cancelRst = await upbit.cancel(result.uuid);
           console.log('cancelRst',cancelRst);
           await connection.execute(
             "UPDATE variable SET slug = '"+trade_slug+"', status = 1 WHERE `key` = 'upbitBiteFlag'"
           );
-          console.log(data[i].type, data[i].lockAmount, coinInfo[0].trade_price, false, trade_slug, "upbit");
+          console.log(data[i].type, data[i].lockAmount, nowPrice, false, trade_slug, "upbit");
           
-          await sell(data[i].type, data[i].lockAmount, coinInfo[0].trade_price, false, trade_slug, "upbit");
+          await sell(data[i].type, data[i].lockAmount, nowPrice, false, trade_slug, "upbit");
 
         }
       
