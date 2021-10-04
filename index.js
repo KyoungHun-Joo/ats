@@ -411,7 +411,7 @@ async function checkOrder() {
         console.log('구매 대기중')
    
 
-      }
+      } 
     
     } catch (e) {
       console.log('mysql error',e)
@@ -484,9 +484,9 @@ async function upbitTrade(connection) {
         }
 
         console.log("market", market, lastRSI15, priceData[0].trade_price, weight, CONFIG.LOW_POINT, market,boughtItem);
-        if ((await upbitCompare(1, rsiRes15, priceData[0].trade_price, 0, weight))) {
+        if (!boughtItem.includes(market) && (await upbitCompare(1, rsiRes15, priceData[0].trade_price, 0, weight))) {
           buyFlag = true;
-          if(buyItem.rsi>lastRSI15 && !boughtItem.includes(market)){
+          if(buyItem.rsi>lastRSI15){
             buyItem.market = market;
             buyItem.rsi = lastRSI15;
             buyItem.trade_price = priceData[0].trade_price
