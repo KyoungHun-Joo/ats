@@ -436,11 +436,17 @@ async function upbitTrade(connection) {
   var boughtItem = [];
   for (let x = 0; x < upData.length; x++) {
     if (upData[x].status == 3) getCoin = true;
-    if (upData[x].status != 3 && upData[x].slug!="") boughtItem.push(upData[x].slug)
   }
+  
   if (getCoin) upbitData = await upbit.useCoinInfo(connection, 5, 100);
 
   for (let x = 0; x < upData.length; x++) {
+    const [upData2, fields] = await connection.execute(
+      "SELECT * FROM variable where `key` LIKE 'upbit%'"
+    );
+    for (let x = 0; x < upData2.length; x++) {
+      if (upData2[x].status != 3 && upData2[x].slug!="") boughtItem.push(upData2[x].slug)
+    }
     const valueStatus = upData[x].status;
     const lastPrice = upData[x].lastPrice;
     const slug = upData[x].slug;
