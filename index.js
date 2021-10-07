@@ -376,7 +376,7 @@ async function checkOrder() {
         if (status[0].status == 1) {
           var coinPrice = await upbit.coinPrice(trade[0].slug);
 
-          await sell( trade[0].type, trade[0].lockAmount, coinPrice * 1.0035, false, trade[0].slug, "upbit" );
+          await sell( trade[0].type, trade[0].lockAmount, coinPrice, false, trade[0].slug, "upbit" );
           await connection.execute(` UPDATE variable SET status = 1,value = value+${trade[0].price} WHERE \`key\` = '${data[i].type}'` );
           await connection.execute(` UPDATE trade_log SET statusStr = '${result.state}', status =1 WHERE type='${data[i].type}'` );
         
