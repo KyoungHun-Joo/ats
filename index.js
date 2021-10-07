@@ -528,6 +528,8 @@ async function call(event, context, callback) {
   connection = await mysql_dbc.init();
 
   try {
+    var ticker = await getTicker();
+
     await checkOrder();
     await upbitTrade(connection);
 
