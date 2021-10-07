@@ -544,10 +544,6 @@ async function call(event, context, callback) {
     };
   } catch (e) {
     console.log(e);
-    SELECT * FROM cmc.trade_log 
-    where type = 'upbitMoney'
-    order by createdAt desc;
-    
     return {
       statusCode: 400,
       headers: {
