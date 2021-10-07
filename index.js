@@ -377,7 +377,7 @@ async function checkOrder() {
           var coinPrice = await upbit.coinPrice(trade[0].slug);
 
           await sell( trade[0].type, trade[0].lockAmount, coinPrice, false, trade[0].slug, "upbit" );
-          await connection.execute(` UPDATE variable SET status = 1,value = value+${trade[0].price} WHERE \`key\` = '${data[i].type}'` );
+          await connection.execute(` UPDATE variable SET status = 3,value = value+${trade[0].price} WHERE \`key\` = '${data[i].type}'` );
           await connection.execute(` UPDATE trade_log SET statusStr = '${result.state}', status =1 WHERE type='${data[i].type}'` );
         
         //구매 대기 중 취소했을때
@@ -544,6 +544,10 @@ async function call(event, context, callback) {
     };
   } catch (e) {
     console.log(e);
+    SELECT * FROM cmc.trade_log 
+    where type = 'upbitMoney'
+    order by createdAt desc;
+    
     return {
       statusCode: 400,
       headers: {
