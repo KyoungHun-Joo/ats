@@ -520,12 +520,12 @@ async function call(event, context, callback) {
   //mailService('test')
   const cmc_key = getCmcKey();
   connection = await mysql_dbc.init();
-
   try {
     //var ticker = await upbit.getTicker(connection);
     //console.log('ticker',ticker)
     await checkOrder();
     await upbitTrade(connection);
+    await upbit.upbitCoinSet(connection);
 
     await connection.release();
 
