@@ -378,8 +378,8 @@ async function checkOrder() {
         if (status[0].status == 1) {
           var coinPrice = await upbit.coinPrice(trade[0].slug);
 
-          await sell( trade[0].type, trade[0].lockAmount, coinPrice * 1.0035, false, trade[0].slug, "upbit" );
-          await connection.execute(` UPDATE variable SET status = 1,value = value+${trade[0].price} WHERE \`key\` = '${data[i].type}'` );
+          await sell( trade[0].type, trade[0].lockAmount, coinPrice, false, trade[0].slug, "upbit" );
+          await connection.execute(` UPDATE variable SET status = 3,value = value+${trade[0].price} WHERE \`key\` = '${data[i].type}'` );
           await connection.execute(` UPDATE trade_log SET statusStr = '${result.state}', status =1 WHERE type='${data[i].type}'` );
         
         //구매 대기 중 취소했을때
@@ -391,17 +391,11 @@ async function checkOrder() {
 
       //구매 판매 확인 프로세스
       }else if(result.side == "ask" && result.state=="wait" && differentHours>1){
-        if(data[i].type=="upbitMoney"){
-          console.log('판매 대기중', nowPrice, data[i].buysellPrice*0.996)
-
-        }
-        if(data[i].type=="upbitMoney" && nowPrice > data[i].buysellPrice*0.996 &&  false){
+        if(data[i].type=="upbitMoney" && nowPrice > data[i].buysellPrice*0.996){
 
           const cancelRst = await upbit.cancel(result.uuid);
           console.log('cancelRst',cancelRst);
-          await connection.execute(
-            "UPDATE variable SET slug = '"+trade_slug+"', status = 1 WHERE `key` = 'upbitBiteFlag'"
-          );
+          //await connection.execute( "UPDATE variable SET slug = '"+trade_slug+"', status = 1 WHERE `key` = 'upbitBiteFlag'" );
           console.log(data[i].type, data[i].lockAmount, nowPrice, false, trade_slug, "upbit");
           
           await sell(data[i].type, data[i].lockAmount, nowPrice, false, trade_slug, "upbit");
@@ -436,13 +430,20 @@ async function upbitTrade(connection) {
   };
   var getCoin = false;
   var boughtItem = [];
+  var showCoinData = true;
   for (let x = 0; x < upData.length; x++) {
     if (upData[x].status == 3) getCoin = true;
-    if (upData[x].status != 3 && upData[x].slug!="") boughtItem.push(upData[x].slug)
   }
+
   if (getCoin) upbitData = await upbit.useCoinInfo(connection, 5, 100);
 
   for (let x = 0; x < upData.length; x++) {
+    const [upData2, fields] = await connection.execute(
+      "SELECT * FROM variable where `key` LIKE 'upbit%'"
+    );
+    for (let x = 0; x < upData2.length; x++) {
+      if (upData2[x].status != 3 && upData2[x].slug!="") boughtItem.push(upData2[x].slug)
+    }
     const valueStatus = upData[x].status;
     const lastPrice = upData[x].lastPrice;
     const slug = upData[x].slug;
@@ -452,6 +453,7 @@ async function upbitTrade(connection) {
     var buyFlag = false;
 
     if (valueStatus == 3) {
+      
       var buyItem = {
         type:type,
         value:value,
@@ -485,7 +487,7 @@ async function upbitTrade(connection) {
           }
         }
 
-        console.log("market", market, lastRSI15, priceData[0].trade_price, weight, CONFIG.LOW_POINT, market,boughtItem);
+        if(showCoinData) console.log("market", market, lastRSI15, priceData[0].trade_price, weight, CONFIG.LOW_POINT, market,boughtItem);
         if (!boughtItem.includes(market) && (await upbitCompare(1, rsiRes15, priceData[0].trade_price, 0, weight))) {
           buyFlag = true;
           if(buyItem.rsi>lastRSI15){
@@ -496,7 +498,7 @@ async function upbitTrade(connection) {
 
         }
       }
-
+      showCoinData =false;
       if(buyFlag){
         console.log('buyITem',buyItem)
         await buy(
@@ -520,8 +522,10 @@ async function call(event, context, callback) {
   //mailService('test')
   const cmc_key = getCmcKey();
   connection = await mysql_dbc.init();
-
   try {
+    //var ticker = await upbit.upbitCoinSet(connection);
+    //var ticker = await upbit.getTicker(connection);
+
     await checkOrder();
     await upbitTrade(connection);
 
