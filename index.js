@@ -521,7 +521,7 @@ async function call(event, context, callback) {
   const cmc_key = getCmcKey();
   connection = await mysql_dbc.init();
   try {
-    var ticker = await upbit.getTicker(connection);
+    var ticker = await upbit.upbitCoinSet(connection);
     console.log('ticker',ticker)
     await checkOrder();
     await upbitTrade(connection);
