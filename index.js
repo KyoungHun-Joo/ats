@@ -523,7 +523,7 @@ async function call(event, context, callback) {
 
   try {
     var ticker = await upbit.getTicker(connection);
-    console.log('ticker',ticker.length)
+    console.log('ticker',ticker)
     await checkOrder();
     await upbitTrade(connection);
 
