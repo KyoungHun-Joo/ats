@@ -139,7 +139,9 @@ async function sell(
     console.log("buysellPrice not valid", buysellPrice, coinPrice);
     return;
   }
-
+  if(coinPirce<3000){
+    coinprice = coinprice + (coinprice%10) +1; 
+  }
   if ( platform == "upbit" ){
     coinPrice = await upbit.converPrice(coinPrice);
     var order_id = await upbit.trade("ask", slug, coinPrice, lockAmount);
