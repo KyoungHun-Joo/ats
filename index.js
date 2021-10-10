@@ -62,7 +62,7 @@ async function buy(
   var lockAmount = Math.floor((amount / coinPrice) * 10000) / 10000;
 
   amount -= lockAmount * coinPrice;
-
+amount -= 200;
   if (amount < 0) amount = 0;
   if (test) {
     await connection.execute(
@@ -139,9 +139,9 @@ async function sell(
     console.log("buysellPrice not valid", buysellPrice, coinPrice);
     return;
   }
-  if(coinPirce<3000){
-    coinprice = coinprice + (coinprice%10) +1; 
-  } 
+	//if(coinPirce<3000){
+  //  coinPrice = coinPrice + (coinPrice%10) +1; 
+ // } 
   if ( platform == "upbit" ){
     coinPrice = await upbit.converPrice(coinPrice);
     var order_id = await upbit.trade("ask", slug, coinPrice, lockAmount);
