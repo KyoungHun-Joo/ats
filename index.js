@@ -402,10 +402,11 @@ async function checkOrder() {
 
         }
 
-      }else if(result.side == "bid" && result.state=="wait" && differentHours>1){
+      }else if(result.side == "bid" && result.state=="wait" && differentMin>30){
 
-        console.log('구매 대기중')
-   
+        console.log('구매 대기 취소')
+        const cancelRst = await upbit.cancel(result.uuid);
+        await connection.execute( "UPDATE variable SET key = '"+tdata[i].type+"', status = 3" );
 
       } 
     
