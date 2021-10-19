@@ -10,7 +10,7 @@ async function strategy(buySell, rsiRes,lastPrice, price,weight=0){
   var lastRSI4 = (rsiRes[rsiRes.length - 4] >= 0)? rsiRes[rsiRes.length - 4] : 0;
 
   var lowPoint = CONFIG.LOW_POINT-weight
-  //console.log('upbit',lastRSI3,lastRSI2,lastRSI, lowPoint)
+  console.log('upbit',lastRSI3,lastRSI2,lastRSI, lowPoint, buySell)
   //매수전
   if(buySell == 1){
     if(lastRSI<=lowPoint && (lastRSI3>=lastRSI2) &&lastRSI2<lastRSI){
