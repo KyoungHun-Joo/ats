@@ -443,7 +443,9 @@ async function upbitTrade(connection) {
 
   if (getCoin) upbitData = await upbit.useCoinInfo(connection, 5, 100);
   if (getCoin3){
-    upbitData3 = await upbit.useCoinInfo(connection, 3, 100);
+    
+    upbitData3 = await upbit.coinInfo(3, 'KRW-ETH',100);
+    console.log('upbitData',upbitData3)
     let market = upbitData3.market;
     let priceData = upbitData3.data;
     let weight = upbitData3.weight;
