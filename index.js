@@ -436,6 +436,7 @@ async function upbitTrade(connection) {
   var showCoinData = true;
   
   for (let x = 0; x < upData.length; x++) {
+    console.log(upData[x].type,upData[x].status )
     //if (upData[x].status == 3) getCoin = true;
     if(upData[x].type=="upbitMoney3" && (upData[x].status == 3||upData[x].status == 4)) getCoin3 = true;
   }
@@ -444,7 +445,29 @@ async function upbitTrade(connection) {
   if (getCoin) upbitData = await upbit.useCoinInfo(connection, 5, 100);
   if (getCoin3){
     upbitData3 = await upbit.useCoinInfo(connection, 3, 100);
-    console.log('upbit3',upbitData3)
+    console.log('upbit3',upbitData3);
+    let market = upbitData[i].market;
+    let priceData = upbitData[i].data;
+    let weight = upbitData[i].weight;
+
+    for (let j = priceData.length - 1; j >= 0; j--) {
+      await inputRSI15.values.push(priceData[j].trade_price);
+    }
+    const rsiRes15 = await RSI.calculate(inputRSI15);
+    var lastRSI15 =
+      rsiRes15[rsiRes15.length - 1] >= 0
+        ? rsiRes15[rsiRes15.length - 1]
+        : 0;
+
+    if(biteFlag[0].status==1){
+      if(market != biteFlag[0].slug){
+        rsiRes15[rsiRes15.length - 1] += 15;
+        lastRSI15 = rsiRes15[rsiRes15.length - 1];
+      }else{
+        lastRSI15 -= biteFlag[0].weight;
+      }
+    }
+
     lastRSI3
   } 
 
