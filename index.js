@@ -424,21 +424,29 @@ async function upbitTrade(connection) {
     "SELECT status, slug, weight FROM variable WHERE `key` = 'upbitBiteFlag' "
   );
 
-  var upbitData;
+  var upbitData, upbitData3;
+  var lastRSI3;
   var inputRSI15 = {
     values: [],
     period: 14,
   };
   var getCoin = true;
+  var getCoin3 = false;
   var boughtItem = [];
   var showCoinData = true;
-  /*
+  
   for (let x = 0; x < upData.length; x++) {
-    if (upData[x].status == 3) getCoin = true;
+    //if (upData[x].status == 3) getCoin = true;
+    if(upData[x].type=="upbitMoney3" && (upData[x].status == 3||upData[x].status == 4)) getCoin3 = true;
   }
-  */
+  
 
   if (getCoin) upbitData = await upbit.useCoinInfo(connection, 5, 100);
+  if (getCoin3){
+    upbitData3 = await upbit.useCoinInfo(connection, 3, 100);
+    console.log('upbit3',upbitData3)
+    lastRSI3
+  } 
 
   for (let x = 0; x < upData.length; x++) {
     const [upData2, fields] = await connection.execute(
