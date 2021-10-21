@@ -559,12 +559,12 @@ async function upbitTrade(connection) {
       //if(await upbitCompare(2,0,lastPrice,coinPrice)) await sell(type,lockAmount,coinPrice,false,slug,"upbit")
 
       if(type=='upbitMoney3'){
-        console.log('upbitmoney3 sell', coinPrice,last3Ver3,last2Ver3,lastVer3)
 
         var lastVer3 = (rsiVersion3[rsiVersion3.length - 1] >= 0)? rsiVersion3[rsiVersion3.length - 1] : 0;
         var last2Ver3 = (rsiVersion3[rsiVersion3.length - 2] >= 0)? rsiVersion3[rsiVersion3.length - 2] : 0;
         var last3Ver3 = (rsiVersion3[rsiVersion3.length - 3] >= 0)? rsiVersion3[rsiVersion3.length - 3] : 0;
         var highPoint = 55
+        console.log('upbitmoney3 sell', coinPrice,last3Ver3,last2Ver3,lastVer3)
 
         if (lastVer3>=highPoint && (last3Ver3<=last2Ver3) && last2Ver3>lastVer3 && market=="KRW-ETH") {
           await sell(type, lockAmount, coinPrice , false, slug, "upbit");
