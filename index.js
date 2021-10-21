@@ -518,7 +518,7 @@ async function upbitTrade(connection) {
         if(showCoinData) console.log("market", market, lastRSI15, priceData[0].trade_price, weight, CONFIG.LOW_POINT, market,boughtItem);
 
         if(type=='upbitMoney3'){
-          console.log('upbitmoney3 buy', coinPirce,lastRSI3)
+          console.log('upbitmoney3 buy', priceData[0].trade_price,lastRSI3)
 
           if (lastRSI3<=40 && market=="KRW-ETH") {
 
