@@ -444,24 +444,16 @@ async function upbitTrade(connection) {
   if (getCoin) upbitData = await upbit.useCoinInfo(connection, 5, 100);
   
   if (getCoin3){
-    
+    var inputRSIversion3 = {
+      values: [],
+      period: 14,
+    };
     upbitData3 = await upbit.coinInfo(3, 'KRW-ETH',100);
-    console.log('upbitData',upbitData3.length)
-    
-/*
-		for(let i=data.length-1; i>=0; i--){
-			var result = await this.coinInfo(minutes,data[i].market,count);
-			market.push({market:data[i].market,data:result,weight:data[i].weight});
+  
+		for(let i=upbitData3.length-1; i>=0; i--){
+      await inputRSIversion3.values.push(upbitData3[i].trade_price);
     }
-    
-    let market = upbitData3.market;
-    let priceData = upbitData3.data;
-    let weight = upbitData3.weight;
-
-    for (let j = priceData.length - 1; j >= 0; j--) {
-      await inputRSI15.values.push(priceData[j].trade_price);
-    }
-    let rsiRes15 = await RSI.calculate(inputRSI15);
+    let rsiRes15 = await RSI.calculate(inputRSIversion3);
     lastRSI3 =
       rsiRes15[rsiRes15.length - 1] >= 0
         ? rsiRes15[rsiRes15.length - 1]
@@ -471,7 +463,7 @@ async function upbitTrade(connection) {
       lastRSI3 = rsiRes15[rsiRes15.length - 1];
     }
     console.log('lastRSI',lastRSI3)
-    */
+    
   } 
 
   for (let x = 0; x < upData.length; x++) {
