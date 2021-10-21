@@ -566,7 +566,7 @@ async function upbitTrade(connection) {
         var highPoint = 55
         console.log('upbitmoney3 sell', coinPrice,last3Ver3,last2Ver3,lastVer3)
 
-        if (lastVer3>=highPoint && (last3Ver3<=last2Ver3) && last2Ver3>lastVer3 && market=="KRW-ETH") {
+        if ((last3Ver3<=last2Ver3) && last2Ver3>lastVer3 && market=="KRW-ETH") {
           await sell(type, lockAmount, coinPrice , false, slug, "upbit");
         }
     
