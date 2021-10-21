@@ -436,9 +436,8 @@ async function upbitTrade(connection) {
   var showCoinData = true;
   
   for (let x = 0; x < upData.length; x++) {
-    console.log(upData[x].type,upData[x].status )
     //if (upData[x].status == 3) getCoin = true;
-    if(upData[x].type=="upbitMoney3" && (upData[x].status == 3||upData[x].status == 4)) getCoin3 = true;
+    if(upData[x].key=="upbitMoney3" && (upData[x].status == 3||upData[x].status == 4)) getCoin3 = true;
   }
   
 
