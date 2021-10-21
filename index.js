@@ -430,6 +430,7 @@ async function upbitTrade(connection) {
     values: [],
     period: 14,
   };
+  var rsiVersion3;
   var getCoin = true;
   var getCoin3 = false;
   var boughtItem = [];
@@ -453,15 +454,7 @@ async function upbitTrade(connection) {
 		for(let i=upbitData3.length-1; i>=0; i--){
       await inputRSIversion3.values.push(upbitData3[i].trade_price);
     }
-    let rsiRes15 = await RSI.calculate(inputRSIversion3);
-    lastRSI3 =
-      rsiRes15[rsiRes15.length - 1] >= 0
-        ? rsiRes15[rsiRes15.length - 1]
-        : 0;
-
-    if(biteFlag[0].status==1){
-      lastRSI3 = rsiRes15[rsiRes15.length - 1];
-    }
+    rsiVersion3 = await RSI.calculate(inputRSIversion3);
     
   } 
 
@@ -519,8 +512,14 @@ async function upbitTrade(connection) {
 
         if(type=='upbitMoney3'){
           
-          if(market=="KRW-ETH") console.log('upbitmoney3 buy', priceData[0].trade_price,lastRSI3)
-          if (lastRSI3<=40 && market=="KRW-ETH") {
+
+          var lastVer3 = (rsiVersion3[rsiVersion3.length - 1] >= 0)? rsiVersion3[rsiVersion3.length - 1] : 0;
+          var last2Ver3 = (rsiVersion3[rsiVersion3.length - 2] >= 0)? rsiVersion3[rsiVersion3.length - 2] : 0;
+          var last3Ver3 = (rsiVersion3[rsiVersion3.length - 3] >= 0)? rsiVersion3[rsiVersion3.length - 3] : 0;
+          var lowPoint = 45
+          
+          if(market=="KRW-ETH") console.log('upbitmoney3 buy', priceData[0].trade_price,last3Ver3,last2Ver3,lastVer3)
+          if (lastVer3<=lowPoint && (last3Ver3>=last2Ver3) &&last2Ver3<lastVer3 && market=="KRW-ETH") {
 
               buyFlag = true;
               if(buyItem.rsi>lastRSI15){
@@ -560,11 +559,15 @@ async function upbitTrade(connection) {
       //if(await upbitCompare(2,0,lastPrice,coinPrice)) await sell(type,lockAmount,coinPrice,false,slug,"upbit")
 
       if(type=='upbitMoney3'){
-        console.log('upbitmoney3 sell', coinPirce,lastRSI3)
+        console.log('upbitmoney3 sell', coinPirce,last3Ver3,last2Ver3,lastVer3)
 
-        if (lastRSI3>=60) {
+        var lastVer3 = (rsiVersion3[rsiVersion3.length - 1] >= 0)? rsiVersion3[rsiVersion3.length - 1] : 0;
+        var last2Ver3 = (rsiVersion3[rsiVersion3.length - 2] >= 0)? rsiVersion3[rsiVersion3.length - 2] : 0;
+        var last3Ver3 = (rsiVersion3[rsiVersion3.length - 3] >= 0)? rsiVersion3[rsiVersion3.length - 3] : 0;
+        var highPoint = 55
+
+        if (lastVer3>=highPoint && (last3Ver3<=last2Ver3) && last2Ver3>lastVer3 && market=="KRW-ETH") {
           await sell(type, lockAmount, coinPrice , false, slug, "upbit");
-
         }
     
 
