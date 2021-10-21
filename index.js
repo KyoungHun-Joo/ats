@@ -449,7 +449,7 @@ async function upbitTrade(connection) {
       values: [],
       period: 14,
     };
-    upbitData3 = await upbit.coinInfo(3, 'KRW-ETH',50);
+    upbitData3 = await upbit.coinInfo(1, 'KRW-ETH',50);
   
 		for(let i=upbitData3.length-1; i>=0; i--){
       await inputRSIversion3.values.push(upbitData3[i].trade_price);
@@ -516,10 +516,12 @@ async function upbitTrade(connection) {
           var lastVer3 = (rsiVersion3[rsiVersion3.length - 1] >= 0)? rsiVersion3[rsiVersion3.length - 1] : 0;
           var last2Ver3 = (rsiVersion3[rsiVersion3.length - 2] >= 0)? rsiVersion3[rsiVersion3.length - 2] : 0;
           var last3Ver3 = (rsiVersion3[rsiVersion3.length - 3] >= 0)? rsiVersion3[rsiVersion3.length - 3] : 0;
-          var lowPoint = 45
+          var last4Ver3 = (rsiVersion3[rsiVersion3.length - 4] >= 0)? rsiVersion3[rsiVersion3.length - 4] : 0;
+
+          var lowPoint = 40
           
           if(market=="KRW-ETH") console.log('upbitmoney3 buy', priceData[0].trade_price,last3Ver3,last2Ver3,lastVer3)
-          if (lastVer3<=lowPoint && (last3Ver3>=last2Ver3) &&last2Ver3<lastVer3 && market=="KRW-ETH") {
+          if (lastVer3<=lowPoint && (last4Ver3>=last3Ver3) && (last3Ver3>=last2Ver3) &&last2Ver3<lastVer3 && market=="KRW-ETH") {
 
               buyFlag = true;
               if(buyItem.rsi>lastRSI15){
@@ -563,10 +565,12 @@ async function upbitTrade(connection) {
         var lastVer3 = (rsiVersion3[rsiVersion3.length - 1] >= 0)? rsiVersion3[rsiVersion3.length - 1] : 0;
         var last2Ver3 = (rsiVersion3[rsiVersion3.length - 2] >= 0)? rsiVersion3[rsiVersion3.length - 2] : 0;
         var last3Ver3 = (rsiVersion3[rsiVersion3.length - 3] >= 0)? rsiVersion3[rsiVersion3.length - 3] : 0;
-        var highPoint = 55
-        console.log('upbitmoney3 sell', coinPrice,last3Ver3,last2Ver3,lastVer3)
+        var last4Ver3 = (rsiVersion3[rsiVersion3.length - 4] >= 0)? rsiVersion3[rsiVersion3.length - 4] : 0;
 
-        if (lastVer3>=highPoint && (last3Ver3<=last2Ver3) && last2Ver3>lastVer3) {
+        var highPoint = 60
+        console.log('upbitmoney3 sell', coinPrice,last4Ver3,last3Ver3,last2Ver3,lastVer3)
+
+        if (lastVer3>=highPoint && (last4Ver3<=last3Ver3) && (last3Ver3<=last2Ver3) && last2Ver3>lastVer3) {
           await sell(type, lockAmount, coinPrice , false, slug, "upbit");
         }
     
