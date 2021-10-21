@@ -471,7 +471,7 @@ async function upbitTrade(connection) {
       "SELECT * FROM variable where `key` LIKE 'upbit%'"
     );
     for (let x = 0; x < upData2.length; x++) {
-      if (upData2[x].status != 3 && upData2[x].slug!="") boughtItem.push(upData2[x].slug)
+      if (upData2[x].status != 3 && upData2[x].slug!=""&& upData2[x].key!="upbitMoney3") boughtItem.push(upData2[x].slug)
     }
     const valueStatus = upData[x].status;
     const lastPrice = upData[x].lastPrice;
@@ -520,10 +520,12 @@ async function upbitTrade(connection) {
 
         if(type=='upbitMoney3'){
           if (lastRSI3<=40 && market=="KRW-ETH") {
+            console.log('upbitmoney3 buy', coinPirce,lastRSI3)
+
               buyFlag = true;
               if(buyItem.rsi>lastRSI15){
                 buyItem.market = market;
-                buyItem.rsi = lastRSI15;
+                buyItem.rsi = lastRSI3;
                 buyItem.trade_price = priceData[0].trade_price
               }
           }
@@ -560,6 +562,7 @@ async function upbitTrade(connection) {
       if(type=='upbitMoney3'){
 
         if (lastRSI3>=60) {
+          console.log('upbitmoney3 sell', coinPirce,lastRSI3)
           await sell(type, lockAmount, coinPrice , false, slug, "upbit");
 
         }
