@@ -441,9 +441,18 @@ async function upbitTrade(connection) {
     if(upData[x].key=="upbitMoney3" && (upData[x].status == 3||upData[x].status == 4)) getCoin3 = true;
   }
   
-
+  var marketPriceData = {};
   if (getCoin) upbitData = await upbit.useCoinInfo(connection, 5, 100);
-  console.log('test',upbitData)
+
+
+  for (let i = 0; i < upbitData.length; i++) {
+
+    let market = upbitData[i].market;
+    let priceData = upbitData[i].data;
+    marketPriceData[market] = priceData[0].trade_price;
+  }
+  console.log('marketPriceData',marketPriceData)
+
   if (getCoin3){
     var inputRSIversion3 = {
       values: [],
