@@ -443,7 +443,7 @@ async function upbitTrade(connection) {
   
 
   if (getCoin) upbitData = await upbit.useCoinInfo(connection, 5, 100);
-  
+  console.log('test',upbitData)
   if (getCoin3){
     var inputRSIversion3 = {
       values: [],
