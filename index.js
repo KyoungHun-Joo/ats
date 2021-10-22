@@ -567,7 +567,7 @@ async function upbitTrade(connection) {
         var last3Ver3 = (rsiVersion3[rsiVersion3.length - 3] >= 0)? rsiVersion3[rsiVersion3.length - 3] : 0;
         var last4Ver3 = (rsiVersion3[rsiVersion3.length - 4] >= 0)? rsiVersion3[rsiVersion3.length - 4] : 0;
 
-        var highPoint = 65
+        var highPoint = 60
         console.log('upbitmoney3 sell', coinPrice,last4Ver3,last3Ver3,last2Ver3,lastVer3)
 
         if (lastVer3>=highPoint && (last3Ver3<=last2Ver3) && last2Ver3>lastVer3) {
