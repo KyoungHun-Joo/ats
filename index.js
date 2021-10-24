@@ -462,7 +462,7 @@ async function upbitTrade(connection) {
       rsiRes15[rsiRes15.length - 1] >= 0
         ? rsiRes15[rsiRes15.length - 1]
         : 0;
-    console.log('test rsi',lastRSI15)
+    console.log('test rsi',market,lastRSI15)
   }
   for (let i = 0; i < upbitData.length; i++) {
 
@@ -525,7 +525,7 @@ async function upbitTrade(connection) {
           rsiRes15[rsiRes15.length - 1] >= 0
             ? rsiRes15[rsiRes15.length - 1]
             : 0;
-
+        console.log('test last rsi ',market,lastRSI15)
         if(biteFlag[0].status==1){
           if(market != biteFlag[0].slug){
             rsiRes15[rsiRes15.length - 1] += 15;
