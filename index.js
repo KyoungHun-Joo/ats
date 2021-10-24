@@ -422,7 +422,7 @@ async function upbitTrade(connection) {
   var marketPriceData = {};
   if (getCoin) upbitData = await upbit.useCoinInfo(connection, 5, 100);
 
-  var testData = await upbit.useCoinInfo(connection, 5, 50);
+  var testData = await upbit.useCoinInfo(connection, 5, 150);
 
   for (let i = 0; i < testData.length; i++) {
     var inputRSI15test = {
