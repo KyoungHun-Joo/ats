@@ -62,31 +62,9 @@ async function buy(
   var lockAmount = Math.floor((amount / coinPrice) * 10000) / 10000;
 
   amount -= lockAmount * coinPrice;
-amount -= 200;
-  if (amount < 0) amount = 0;
-  if (test) {
-    await connection.execute(
-      "UPDATE variable SET status=4, slug='" +
-        slug +
-        "' WHERE `key` = '" +
-        type +
-        "'"
-    );
 
-    await connection.query(
-      "INSERT INTO trade_log (type, price, lockAmount, buysell,buysellPrice,order_id,slug,status,lastPrice) VALUES ('" +
-        type +
-        "', '" +
-        amount +
-        "', '" +
-        lockAmount +
-        "', 4,'" +
-        coinPrice +
-        "','','" +
-        slug +
-        "',1)"
-    );
-  } else {
+  if (amount < 0) amount = 0;
+
     var order_id = await upbit.trade("bid", slug, coinPrice, lockAmount);
     console.log("order id", order_id);
  
@@ -113,7 +91,7 @@ amount -= 200;
           "')"
       );
     }
-  }
+  
   return;
 }
 
@@ -464,6 +442,35 @@ async function upbitTrade(connection) {
         : 0;
     console.log('test rsi',market,lastRSI15)
   }
+
+
+  for (let i = 0; i < upbitData.length; i++) {
+    var inputRSI15 = {
+      values: [],
+      period: 14,
+    };
+    const market = upbitData[i].market;
+    const priceData = upbitData[i].data;
+    const weight = upbitData[i].weight;
+
+    for (let j = priceData.length - 1; j >= 0; j--) {
+      await inputRSI15.values.push(priceData[j].trade_price);
+    }
+    const rsiRes15 = await RSI.calculate(inputRSI15);
+    var lastRSI15 =
+      rsiRes15[rsiRes15.length - 1] >= 0
+        ? rsiRes15[rsiRes15.length - 1]
+        : 0;
+    console.log('test last rsi ',market,lastRSI15)
+    if(biteFlag[0].status==1){
+      if(market != biteFlag[0].slug){
+        rsiRes15[rsiRes15.length - 1] += 15;
+        lastRSI15 = rsiRes15[rsiRes15.length - 1];
+      }else{
+        lastRSI15 -= biteFlag[0].weight;
+      }
+    }
+  }  
   for (let i = 0; i < upbitData.length; i++) {
 
     let market = upbitData[i].market;
