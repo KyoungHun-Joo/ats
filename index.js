@@ -444,7 +444,24 @@ async function upbitTrade(connection) {
   var marketPriceData = {};
   if (getCoin) upbitData = await upbit.useCoinInfo(connection, 5, 100);
 
- 
+  var testData = await upbit.useCoinInfo(connection, 5, 50);
+
+  for (let i = 0; i < testData.length; i++) {
+
+    inputRSI15test.values = [];
+    const market = testData[i].market;
+    const priceData = testData[i].data;
+
+    for (let j = priceData.length - 1; j >= 0; j--) {
+      await inputRSI15test.values.push(priceData[j].trade_price);
+    }
+    const rsiRes15 = await RSI.calculate(inputRSI15test);
+    var lastRSI15 =
+      rsiRes15[rsiRes15.length - 1] >= 0
+        ? rsiRes15[rsiRes15.length - 1]
+        : 0;
+    console.log('test rsi',lastRSI15)
+  }
   for (let i = 0; i < upbitData.length; i++) {
 
     let market = upbitData[i].market;
