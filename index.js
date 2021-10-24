@@ -444,7 +444,7 @@ async function upbitTrade(connection) {
   var marketPriceData = {};
   if (getCoin) upbitData = await upbit.useCoinInfo(connection, 5, 100);
 
-
+ 
   for (let i = 0; i < upbitData.length; i++) {
 
     let market = upbitData[i].market;
@@ -577,7 +577,7 @@ async function upbitTrade(connection) {
         var last4Ver3 = (rsiVersion3[rsiVersion3.length - 4] >= 0)? rsiVersion3[rsiVersion3.length - 4] : 0;
 
         var highPoint = 60
-        console.log('upbitmoney3 sell', coinPrice,lastVer3)
+        console.log('upbitmoney3 sell', type, lockAmount, lastPrice * 1.0017, false, slug,coinPrice,lastVer3)
 
         //if (lastVer3>=highPoint && lastVer3 != 100) {
         //  await sell(type, lockAmount, coinPrice , false, slug, "upbit");
