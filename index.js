@@ -579,7 +579,7 @@ async function upbitTrade(connection) {
         var highPoint = 60
         console.log('upbitmoney3 sell', coinPrice,lastVer3)
 
-        if (lastVer3>=highPoint) {
+        if (lastVer3>=highPoint && lastVer3 != 100) {
           await sell(type, lockAmount, coinPrice , false, slug, "upbit");
         }
     
