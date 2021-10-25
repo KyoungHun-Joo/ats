@@ -495,7 +495,7 @@ async function upbitTrade(connection) {
           }
         }
 
-        if(showCoinData) console.log("market", market, lastRSI15, priceData[0].trade_price, CONFIG.LOW_POINT, market,boughtItem);
+        if(showCoinData) console.log("market", market, lastRSI15, priceData[0].trade_price, CONFIG.LOW_POINT, market);
 
         if(type=='upbitMoney3'){
           
