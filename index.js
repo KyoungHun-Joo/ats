@@ -485,8 +485,8 @@ async function upbitTrade(connection) {
           rsiRes15[rsiRes15.length - 1] >= 0
             ? rsiRes15[rsiRes15.length - 1]
             : 0;
-        console.log('test last rsi ',market,lastRSI15)
-        if(biteFlag[0].status==1){
+
+            if(biteFlag[0].status==1){
           if(market != biteFlag[0].slug){
             rsiRes15[rsiRes15.length - 1] += 15;
             lastRSI15 = rsiRes15[rsiRes15.length - 1];
@@ -495,7 +495,7 @@ async function upbitTrade(connection) {
           }
         }
 
-        if(showCoinData) console.log("market", market, lastRSI15, priceData[0].trade_price, weight, CONFIG.LOW_POINT, market,boughtItem);
+        if(showCoinData) console.log("market", market, lastRSI15, priceData[0].trade_price, CONFIG.LOW_POINT, market,boughtItem);
 
         if(type=='upbitMoney3'){
           
