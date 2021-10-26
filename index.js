@@ -505,7 +505,7 @@ async function upbitTrade(connection) {
           var last3Ver3 = (rsiVersion3[rsiVersion3.length - 3] >= 0)? rsiVersion3[rsiVersion3.length - 3] : 0;
           var last4Ver3 = (rsiVersion3[rsiVersion3.length - 4] >= 0)? rsiVersion3[rsiVersion3.length - 4] : 0;
 
-          var lowPoint = 33
+          var lowPoint = 31
           
           if(market=="KRW-ETH") console.log('upbitmoney3 buy', priceData[0].trade_price,lastVer3)
           if (lastVer3<=lowPoint && market=="KRW-ETH") {
