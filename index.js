@@ -562,7 +562,7 @@ async function upbitTrade(connection) {
         //  await sell(type, lockAmount, coinPrice , false, slug, "upbit");
         //}
     
-        await sell(type, lockAmount, lastPrice * 1.0017, false, slug, "upbit");
+        await sell(type, lockAmount, lastPrice * 1.002, false, slug, "upbit");
 
       }else{
         await sell(type, lockAmount, lastPrice * 1.0055, false, slug, "upbit");
