@@ -112,6 +112,7 @@ async function sell(
                                                   ` AND \`buysell\` = 1 ORDER BY createdAt DESC LIMIT 0,1`);
   var buysellPrice = data[0].buysellPrice;
   var left = data[0].price - data[0].fee - value;
+  value = value-data[0].fee;
   console.log("sell in 2 ", slug, data[0].slug);
   if (slug != data[0].slug) return;
 
