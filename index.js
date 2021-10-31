@@ -64,7 +64,7 @@ async function buy(
   amount -= lockAmount * coinPrice;
 
   
-  if(type1='upbitMoney3') amount-=200;
+  if(type1=='upbitMoney3'||type1=='upbitMoney4') amount-=200;
   if (amount < 0) amount = 0;
 
     var order_id = await upbit.trade("bid", slug, coinPrice, lockAmount);
@@ -329,7 +329,7 @@ async function checkOrder() {
           await connection.execute(` UPDATE variable SET status = 4,value='${bidVal}',lockAmount = '${trade_units}',`+
                                    ` lastPrice = '${result.price}' WHERE \`key\` = '${data[i].type}'`);
 
-          if(biteFlag[0].status ==0 && data[i].type!='upbitMoney3'){
+          if(biteFlag[0].status ==0 && (data[i].type!='upbitMoney3'||data[i].type!='upbitMoney4')){
             await connection.execute(`UPDATE upbit_coin SET weight = weight+2 WHERE \`market\` = '${data[i].slug}'` );
             await connection.execute(`UPDATE upbit_coin SET weight = if(weight>0,weight -0.5,weight) WHERE \`market\` != '${data[i].slug}'`);
           }
@@ -418,7 +418,8 @@ async function upbitTrade(connection) {
   
   for (let x = 0; x < upData.length; x++) {
     //if (upData[x].status == 3) getCoin = true;
-    if(upData[x].key=="upbitMoney3" && (upData[x].status == 3||upData[x].status == 4)) getCoin3 = true;
+    if(upData[x].key=="upbitMoney3" || upData[x].key=="upbitMoney4" && (upData[x].status == 3||upData[x].status == 4)) getCoin3 = true;
+    
   }
   
   var marketPriceData = {};
@@ -450,7 +451,7 @@ async function upbitTrade(connection) {
       "SELECT * FROM variable where `key` LIKE 'upbit%'"
     );
     for (let x = 0; x < upData2.length; x++) {
-      if (upData2[x].status != 3 && upData2[x].slug!=""&& upData2[x].key!="upbitMoney3") boughtItem.push(upData2[x].slug)
+      if (upData2[x].status != 3 && upData2[x].slug!=""&& (upData2[x].key!="upbitMoney3"||upData2[x].key!="upbitMoney4")) boughtItem.push(upData2[x].slug)
     }
     const valueStatus = upData[x].status;
     const lastPrice = upData[x].lastPrice;
@@ -497,7 +498,7 @@ async function upbitTrade(connection) {
 
         if(showCoinData) console.log("market", market, lastRSI15, priceData[0].trade_price, weight, CONFIG.LOW_POINT, market,boughtItem);
 
-        if(type=='upbitMoney3'){
+        if(type=='upbitMoney3' || type=="upbitMoney4"){
           
 
           var lastVer3 = (rsiVersion3[rsiVersion3.length - 1] >= 0)? rsiVersion3[rsiVersion3.length - 1] : 0;
@@ -508,7 +509,7 @@ async function upbitTrade(connection) {
           var lowPoint = 30
           
           if(market=="KRW-ETH") console.log('upbitmoney3 buy', priceData[0].trade_price,lastVer3)
-          if (lastVer3<=lowPoint && market=="KRW-ETH") {
+          if (last2Ver3<lastVer3 && (lastVer3<=lowPoint || last2Ver3<=lowPoint) && market=="KRW-ETH") {
 
               buyFlag = true;
               if(buyItem.rsi>lastRSI15){
@@ -548,7 +549,7 @@ async function upbitTrade(connection) {
       console.log("coinPrice", lockAmount, lastPrice, slug, coinPrice);
       //if(await upbitCompare(2,0,lastPrice,coinPrice)) await sell(type,lockAmount,coinPrice,false,slug,"upbit")
 
-      if(type=='upbitMoney3' && slug=="KRW-ETH"){
+      if((type=='upbitMoney3'||type=='upbitMoney4') && slug=="KRW-ETH"){
 
         var lastVer3 = (rsiVersion3[rsiVersion3.length - 1] >= 0)? rsiVersion3[rsiVersion3.length - 1] : 0;
         var last2Ver3 = (rsiVersion3[rsiVersion3.length - 2] >= 0)? rsiVersion3[rsiVersion3.length - 2] : 0;
