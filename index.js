@@ -508,7 +508,7 @@ async function upbitTrade(connection) {
 
           var lowPoint = 30
           
-          if(market=="KRW-ETH") console.log(type+'---', priceData[0].trade_price,lastVer3)
+          if(market=="KRW-ETH") console.log(type+'---', priceData[0].trade_price,last2Ver3,lastVer3)
           if (last2Ver3<lastVer3 && (lastVer3<=lowPoint || last2Ver3<=lowPoint) && market=="KRW-ETH") {
 
               buyFlag = true;
