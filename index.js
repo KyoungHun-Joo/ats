@@ -64,7 +64,7 @@ async function buy(
   amount -= lockAmount * coinPrice;
 
   
-  if(type1=='upbitMoney3'||type1=='upbitMoney4') amount-=200;
+  if(type=='upbitMoney3'||type=='upbitMoney4') amount-=200;
   if (amount < 0) amount = 0;
 
     var order_id = await upbit.trade("bid", slug, coinPrice, lockAmount);
