@@ -112,7 +112,6 @@ async function sell(
                                                   ` AND \`buysell\` = 1 ORDER BY createdAt DESC LIMIT 0,1`);
   var buysellPrice = data[0].buysellPrice;
   var left = data[0].price - data[0].fee - value;
-  value = value-data[0].fee;
   console.log("sell in 2 ", slug, data[0].slug);
   if (slug != data[0].slug) return;
 
@@ -487,8 +486,8 @@ async function upbitTrade(connection) {
           rsiRes15[rsiRes15.length - 1] >= 0
             ? rsiRes15[rsiRes15.length - 1]
             : 0;
-
-            if(biteFlag[0].status==1){
+        console.log('test last rsi ',market,lastRSI15)
+        if(biteFlag[0].status==1){
           if(market != biteFlag[0].slug){
             rsiRes15[rsiRes15.length - 1] += 15;
             lastRSI15 = rsiRes15[rsiRes15.length - 1];
@@ -497,7 +496,7 @@ async function upbitTrade(connection) {
           }
         }
 
-        if(showCoinData) console.log("market", market, lastRSI15, priceData[0].trade_price, CONFIG.LOW_POINT, market);
+        if(showCoinData) console.log("market", market, lastRSI15, priceData[0].trade_price, weight, CONFIG.LOW_POINT, market,boughtItem);
 
         if(type=='upbitMoney3' || type=="upbitMoney4"){
           
@@ -558,13 +557,13 @@ async function upbitTrade(connection) {
         var last4Ver3 = (rsiVersion3[rsiVersion3.length - 4] >= 0)? rsiVersion3[rsiVersion3.length - 4] : 0;
 
         var highPoint = 60
-        console.log('upbitmoney3 sell', type, lockAmount, lastPrice * 1.0020, false, slug,coinPrice,lastVer3)
+        console.log('upbitmoney3 sell', type, lockAmount, lastPrice * 1.0017, false, slug,coinPrice,lastVer3)
 
         //if (lastVer3>=highPoint && lastVer3 != 100) {
         //  await sell(type, lockAmount, coinPrice , false, slug, "upbit");
         //}
     
-        await sell(type, lockAmount, lastPrice * 1.002, false, slug, "upbit");
+        await sell(type, lockAmount, lastPrice * 1.0017, false, slug, "upbit");
 
       }else{
         await sell(type, lockAmount, lastPrice * 1.0055, false, slug, "upbit");
@@ -580,7 +579,7 @@ async function call(event, context, callback) {
   connection = await mysql_dbc.init();
   try {
     //var ticker = await upbit.upbitCoinSet(connection);
-    //var ticker = await upbit.recordingPrice(connection);
+    //var ticker = await upbit.getTicker(connection);
 
     await checkOrder();
     await upbitTrade(connection);
