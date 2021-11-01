@@ -586,7 +586,7 @@ async function call(event, context, callback) {
   connection = await mysql_dbc.init();
   try {
     var ticker = await upbit.recordingPrice(connection);
-    await upbit.getPriceDataPeriod();
+    //await upbit.getPriceDataPeriod();
 
     await checkOrder();
     await upbitTrade(connection);
