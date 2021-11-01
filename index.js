@@ -301,7 +301,7 @@ async function checkOrder() {
         nowPrice = marketPriceData[data[i].slug]
       }else{
         nowPrice = await upbit.coinPrice(data[i].slug);
-        marketPriceData[market] = nowPrice;
+        marketPriceData[data[i].slug] = nowPrice;
       }
       var firstDate = new Date(result.created_at);
       var secondDate = new Date();
