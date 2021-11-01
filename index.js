@@ -266,10 +266,6 @@ async function checkOrder() {
   const [biteFlag, fileds] = await connection.execute("SELECT status, slug FROM variable WHERE `key` = 'upbitBiteFlag' ");
 
   if (!data) return;
-
-    
-  var marketPriceData = {};
-
   var upbitCoinData = {};
   for (let i = 0; i < data.length; i++) {
     if (!data[i].order_id) return;
@@ -298,13 +294,8 @@ async function checkOrder() {
       */
     
       var result = await upbit.orderInfo(data[i].order_id);
-      var nowPrice = 0;
-      if(data[i].slug in marketPriceData){
-        nowPrice = marketPriceData[data[i].slug]
-      }else{
-        nowPrice = await upbit.coinPrice(data[i].slug);
-        marketPriceData[market] = nowPrice;
-      }
+      var nowPrice = await upbit.coinPrice(data[i].slug);
+      
       var firstDate = new Date(result.created_at);
       var secondDate = new Date();
       var timeDifference = Math.abs(secondDate.getTime() - firstDate.getTime());
