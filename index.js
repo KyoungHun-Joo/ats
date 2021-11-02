@@ -335,8 +335,8 @@ async function checkOrder() {
         if (result.side == "bid") {
           console.log("bid completed", trade_amount, leftValue, trade_fee, );
           var bidVal = Number(leftValue[0].value) - trade_amount;
-
-          await connection.execute(` UPDATE trade_log SET statusStr = '${result.state}', status =1 ,price='${trade_amount+trade_fee}', `+
+          trade_amount  += Number(trade_fee)
+          await connection.execute(` UPDATE trade_log SET statusStr = '${result.state}', status =1 ,price='${trade_amount}', `+
           ` lockAmount='${trade_units}',fee='${trade_fee}' WHERE \`id\` = '${data[i].id}' `);
           
           await connection.execute(` UPDATE variable SET status = 4,value='${bidVal}',lockAmount = '${trade_units}',`+
@@ -348,8 +348,9 @@ async function checkOrder() {
           }
 
         } else if (result.side == "ask") {
+          trade_amount  -= Number(trade_fee)
 
-          await connection.execute(` UPDATE trade_log SET statusStr = '${result.state}', status =1 ,price='${trade_amount-trade_fee}', `+
+          await connection.execute(` UPDATE trade_log SET statusStr = '${result.state}', status =1 ,price='${trade_amount}', `+
           ` lockAmount='${trade_units}',fee='${trade_fee}' WHERE \`id\` = '${data[i].id}' `);
           //다음 주문시 trade fee 미리 차감
           trade_amount = trade_amount - trade_fee- trade_fee ;
