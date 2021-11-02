@@ -327,7 +327,7 @@ async function checkOrder() {
         }
         trade_fee = result.paid_fee;
 
-        await connection.execute(` UPDATE trade_log SET statusStr = '${result.state}', status =1 ,price='${trade_amount}', `+
+        await connection.execute(` UPDATE trade_log SET statusStr = '${result.state}', status =1 ,price='${trade_amount+trade_fee}', `+
                                  ` lockAmount='${trade_units}',fee='${trade_fee}' WHERE \`id\` = '${data[i].id}' `);
         //구매완료
         if (result.side == "bid") {
