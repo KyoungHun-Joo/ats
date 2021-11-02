@@ -62,9 +62,13 @@ async function buy(
   var lockAmount = Math.floor((amount / coinPrice) * 10000) / 10000;
 
   amount -= lockAmount * coinPrice;
+ 
+  if(type!='upbitMoney3' && type!='upbitMoney4'){
+    amount-=200;
+  }else{
 
-  
-  if(type!='upbitMoney3' && type!='upbitMoney4') amount-=200;
+  } 
+
   if (amount < 0) amount = 0;
 
     var order_id = await upbit.trade("bid", slug, coinPrice, lockAmount);
@@ -327,22 +331,26 @@ async function checkOrder() {
         }
         trade_fee = result.paid_fee;
 
-        await connection.execute(` UPDATE trade_log SET statusStr = '${result.state}', status =1 ,price='${trade_amount+trade_fee}', `+
-                                 ` lockAmount='${trade_units}',fee='${trade_fee}' WHERE \`id\` = '${data[i].id}' `);
         //구매완료
         if (result.side == "bid") {
-          console.log("bid completed", trade_amount, leftValue, trade_fee);
+          console.log("bid completed", trade_amount, leftValue, trade_fee, );
           var bidVal = Number(leftValue[0].value) - trade_amount;
+
+          await connection.execute(` UPDATE trade_log SET statusStr = '${result.state}', status =1 ,price='${trade_amount+trade_fee}', `+
+          ` lockAmount='${trade_units}',fee='${trade_fee}' WHERE \`id\` = '${data[i].id}' `);
+          
           await connection.execute(` UPDATE variable SET status = 4,value='${bidVal}',lockAmount = '${trade_units}',`+
                                    ` lastPrice = '${result.price}' WHERE \`key\` = '${data[i].type}'`);
 
-          if(biteFlag[0].status ==0 && (data[i].type!='upbitMoney3'||data[i].type!='upbitMoney4')){
+          if(data[i].type!='upbitMoney3' && data[i].type!='upbitMoney4'){
             await connection.execute(`UPDATE upbit_coin SET weight = weight+2 WHERE \`market\` = '${data[i].slug}'` );
             await connection.execute(`UPDATE upbit_coin SET weight = if(weight>0,weight -0.5,weight) WHERE \`market\` != '${data[i].slug}'`);
           }
 
         } else if (result.side == "ask") {
 
+          await connection.execute(` UPDATE trade_log SET statusStr = '${result.state}', status =1 ,price='${trade_amount-trade_fee}', `+
+          ` lockAmount='${trade_units}',fee='${trade_fee}' WHERE \`id\` = '${data[i].id}' `);
           //다음 주문시 trade fee 미리 차감
           trade_amount = trade_amount - trade_fee- trade_fee ;
           trade_amount = Math.floor(trade_amount);
