@@ -564,13 +564,13 @@ async function upbitTrade(connection) {
         var last4Ver3 = (rsiVersion3[rsiVersion3.length - 4] >= 0)? rsiVersion3[rsiVersion3.length - 4] : 0;
 
         var highPoint = 60
-        console.log('upbitmoney3 sell', type, lockAmount, lastPrice * 1.0017, false, slug,coinPrice,lastVer3)
+        console.log('upbitmoney3 sell', type, lockAmount, lastPrice * 1.002, false, slug,coinPrice,lastVer3)
 
         //if (lastVer3>=highPoint && lastVer3 != 100) {
         //  await sell(type, lockAmount, coinPrice , false, slug, "upbit");
         //}
     
-        await sell(type, lockAmount, lastPrice * 1.0017, false, slug, "upbit");
+        await sell(type, lockAmount, lastPrice * 1.002, false, slug, "upbit");
 
       }else{
         await sell(type, lockAmount, lastPrice * 1.0055, false, slug, "upbit");
