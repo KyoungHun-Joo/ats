@@ -13,7 +13,9 @@ async function strategy(buySell, rsiRes,lastPrice, price,weight=0){
   //console.log('upbit',lastRSI3,lastRSI2,lastRSI, lowPoint, buySell)
   //매수전
   if(buySell == 1){
-    if(lastRSI<=lowPoint && (lastRSI3>=lastRSI2) &&lastRSI2<lastRSI){
+    if (last2Ver3<lastVer3 && (lastVer3<=lowPoint || last2Ver3<=lowPoint) && market=="KRW-ETH") {
+
+    if(lastRSI3>lastRSI2 && lastRSI2<lastRSI && (lastRSI2<=lowPoint || lastRSI2<=lowPoint))
       return true;
     }else{
       return false;
