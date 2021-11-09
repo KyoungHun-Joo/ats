@@ -14,7 +14,7 @@ async function strategy(buySell, rsiRes,lastPrice, price,weight=0){
   //매수전
   if(buySell == 1){
 
-    if(lastRSI3>lastRSI2 && lastRSI2<lastRSI && (lastRSI2<=lowPoint || lastRSI2<=lowPoint)){
+    if(lastRSI3>lastRSI2 && lastRSI2<lastRSI && (lastRSI2<=lowPoint || lastRSI<=lowPoint)){
       return true;
     }else{
       return false;
