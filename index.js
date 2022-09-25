@@ -361,6 +361,7 @@ async function checkOrder() {
 
         }
       } else if (result.state == "cancel") {
+        console.log('data',data)
         const [status, fileds1] = await connection.execute(
           "SELECT status FROM variable WHERE `key` = '" + data[i].type + "' "
         );
