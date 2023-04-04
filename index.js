@@ -454,7 +454,7 @@ async function upbitTrade(connection) {
       values: [],
       period: 14,
     };
-    upbitData3 = await upbit.coinInfo(1, 'KRW-ETH',50);
+    upbitData3 = await upbit.coinInfo(1, 'KRW-XRP',50);
   
 		for(let i=upbitData3.length-1; i>=0; i--){
       await inputRSIversion3.values.push(upbitData3[i].trade_price);
