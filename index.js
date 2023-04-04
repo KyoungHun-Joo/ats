@@ -526,7 +526,7 @@ async function upbitTrade(connection) {
           var lowPoint = 25
           
           if(market=="KRW-XRP") console.log(type+'---', priceData[0].trade_price,last2Ver3,lastVer3)
-          if (last2Ver3<lastVer3 && (lastVer3<=lowPoint || last2Ver3<=lowPoint) && market=="KRW-XRP") {
+          if (lastVer3<=lowPoint && market=="KRW-XRP") {
 
               buyFlag = true;
               if(buyItem.rsi>lastRSI15){
