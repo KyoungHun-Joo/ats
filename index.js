@@ -523,7 +523,7 @@ async function upbitTrade(connection) {
           var last3Ver3 = (rsiVersion3[rsiVersion3.length - 3] >= 0)? rsiVersion3[rsiVersion3.length - 3] : 0;
           var last4Ver3 = (rsiVersion3[rsiVersion3.length - 4] >= 0)? rsiVersion3[rsiVersion3.length - 4] : 0;
 
-          var lowPoint = 30
+          var lowPoint = 25
           
           if(market=="KRW-XRP") console.log(type+'---', priceData[0].trade_price,last2Ver3,lastVer3)
           if (last2Ver3<lastVer3 && (lastVer3<=lowPoint || last2Ver3<=lowPoint) && market=="KRW-XRP") {
