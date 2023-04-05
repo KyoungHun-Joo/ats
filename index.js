@@ -366,12 +366,14 @@ async function checkOrder() {
 
       //구매 판매 확인 프로세스
       }else if(result.side == "ask" && result.state=="wait" && differentMin>30){
+        if(nowPrice > data[i].buysellPrice*0.996){
+          const cancelRst = await upbit.cancel(result.uuid);
+          console.log('cancelRst',cancelRst);
+          await connection.execute( "UPDATE variable SET slug = '"+trade_slug+"', status = 1 WHERE `key` = 'upbitBiteFlag'" );
+          console.log(data[i].type, data[i].lockAmount, nowPrice, false, trade_slug, "upbit");
+          await sell(data[i].type, data[i].lockAmount, nowPrice, false, trade_slug, "upbit");
+        }
 
-        const cancelRst = await upbit.cancel(result.uuid);
-        console.log('cancelRst',cancelRst);
-        await connection.execute( "UPDATE variable SET slug = '"+trade_slug+"', status = 1 WHERE `key` = 'upbitBiteFlag'" );
-        console.log(data[i].type, data[i].lockAmount, nowPrice, false, trade_slug, "upbit");
-        await sell(data[i].type, data[i].lockAmount, nowPrice, false, trade_slug, "upbit");
 
       }else if(result.side == "bid" && result.state=="wait" && differentMin>30){
 
@@ -410,7 +412,6 @@ async function upbitTrade(connection) {
   for (let x = 0; x < upData.length; x++) {
     //if (upData[x].status == 3) getCoin = true;
     if(upData[x].key=="upbitMoney3" || upData[x].key=="upbitMoney4" && (upData[x].status == 3||upData[x].status == 4)) getCoin3 = true;
-    
   }
   
   var marketPriceData = {};
@@ -495,13 +496,13 @@ async function upbitTrade(connection) {
           var lastVer3 = (rsiVersion3[rsiVersion3.length - 1] >= 0)? rsiVersion3[rsiVersion3.length - 1] : 0;
           var last2Ver3 = (rsiVersion3[rsiVersion3.length - 2] >= 0)? rsiVersion3[rsiVersion3.length - 2] : 0;
           var last3Ver3 = (rsiVersion3[rsiVersion3.length - 3] >= 0)? rsiVersion3[rsiVersion3.length - 3] : 0;
-          var last4Ver3 = (rsiVersion3[rsiVersion3.length - 4] >= 0)? rsiVersion3[rsiVersion3.length - 4] : 0;
+          //var last4Ver3 = (rsiVersion3[rsiVersion3.length - 4] >= 0)? rsiVersion3[rsiVersion3.length - 4] : 0;
 
           var lowPoint = 29
           
           if(market=="KRW-XRP") console.log(type+'---', priceData[0].trade_price,last3Ver3,last2Ver3,lastVer3)
           //if (lastVer3<=lowPoint && market=="KRW-XRP") {
-          if (last2Ver3<lastVer3 && 50<lastVer3 && lastVer3<57 && market=="KRW-XRP") {
+          if (last2Ver3<lastVer3 && 45<lastVer3 && lastVer3<55 && market=="KRW-XRP") {
 
               buyFlag = true;
               if(buyItem.rsi>lastRSI15){
