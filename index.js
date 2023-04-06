@@ -627,7 +627,7 @@ async function recall() {
 
 if (type == "upbit") {
   // second minute hour day-of-month month day-of-week
-  cron.schedule("* * * * *", function () {
+  cron.schedule("*/5 * * * *", function () {
     call();
   });
 } else {
