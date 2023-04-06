@@ -429,7 +429,7 @@ async function upbitTrade(connection) {
       values: [],
       period: 14,
     };
-    upbitData3 = await upbit.coinInfo(5, 'KRW-XRP',50);
+    upbitData3 = await upbit.coinInfo(5, 'KRW-ETC',50);
   
 		for(let i=upbitData3.length-1; i>=0; i--){
       await inputRSIversion3.values.push(upbitData3[i].trade_price);
@@ -500,9 +500,9 @@ async function upbitTrade(connection) {
 
           var lowPoint = 29
           
-          if(market=="KRW-XRP") console.log(type+'---', priceData[0].trade_price,last3Ver3,last2Ver3,lastVer3)
+          if(market=="KRW-ETC") console.log(type+'---', priceData[0].trade_price,last3Ver3,last2Ver3,lastVer3)
           //if (lastVer3<=lowPoint && market=="KRW-XRP") {
-          if (last2Ver3<lastVer3 && 45<lastVer3 && lastVer3<55 && market=="KRW-XRP") {
+          if (last2Ver3<lastVer3 && 45<lastVer3 && lastVer3<55 && market=="KRW-ETC") {
 
               buyFlag = true;
               if(buyItem.rsi>lastRSI15){
@@ -542,7 +542,7 @@ async function upbitTrade(connection) {
       //console.log("coinPrice", lockAmount, lastPrice, slug, coinPrice);
       //if(await upbitCompare(2,0,lastPrice,coinPrice)) await sell(type,lockAmount,coinPrice,false,slug,"upbit")
 
-      if((type=='upbitMoney3'||type=='upbitMoney4') && slug=="KRW-XRP"){
+      if((type=='upbitMoney3'||type=='upbitMoney4') && slug=="KRW-ETC"){
 
         var lastVer3 = (rsiVersion3[rsiVersion3.length - 1] >= 0)? rsiVersion3[rsiVersion3.length - 1] : 0;
         var last2Ver3 = (rsiVersion3[rsiVersion3.length - 2] >= 0)? rsiVersion3[rsiVersion3.length - 2] : 0;
