@@ -454,7 +454,9 @@ async function upbitTrade(connection) {
     var buyFlag = false;
 
     if (valueStatus == 3) {
-      
+      if(new Date().getMinutes()%5 != 0){
+        continue;
+      }
       var buyItem = {
         type:type,
         value:value,
@@ -552,7 +554,7 @@ async function upbitTrade(connection) {
         var highPoint = 60
         console.log('upbitmoney3 sell', type, lockAmount, lastPrice * 1.002, false, slug,coinPrice,lastVer3)
 
-        if ((lastVer3>=highPoint && lastVer3 != 100 && coinPrice>(lastPrice* 1.002))) {
+        if (((lastVer3>=highPoint && lastVer3 != 100 && coinPrice>(lastPrice* 1.002)) || (coinPrice>lastPrice * 1.01))) {
           await sell(type, lockAmount, coinPrice , false, slug, "upbit");
         }
     
@@ -568,6 +570,8 @@ async function upbitTrade(connection) {
 
 async function call(event, context, callback) {
   //mailService('test')
+
+
   const cmc_key = getCmcKey();
   connection = await mysql_dbc.init();
   try {
@@ -627,7 +631,7 @@ async function recall() {
 
 if (type == "upbit") {
   // second minute hour day-of-month month day-of-week
-  cron.schedule("*/5 * * * *", function () {
+  cron.schedule("* * * * *", function () {
     call();
   });
 } else {
