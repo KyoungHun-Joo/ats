@@ -454,7 +454,7 @@ async function upbitTrade(connection) {
     var buyFlag = false;
 
     if (valueStatus == 3) {
-      if(new Date().getMinutes()%5 != 0){
+      if((new Date().getMinutes())%5 != 0){
         continue;
       }
       var buyItem = {
