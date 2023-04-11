@@ -366,13 +366,15 @@ async function checkOrder() {
 
       //구매 판매 확인 프로세스
       }else if(result.side == "ask" && result.state=="wait" && differentMin>30){
+        /*
         if(nowPrice > data[i].buysellPrice*0.996){
           const cancelRst = await upbit.cancel(result.uuid);
           console.log('cancelRst',cancelRst);
-          await connection.execute( "UPDATE variable SET slug = '"+trade_slug+"', status = 1 WHERE `key` = 'upbitBiteFlag'" );
+          await connection.execute( "UPDATE variable SET slug = '"+trade_slug+"', status = 4 WHERE `key` = 'upbitBiteFlag'" );
           console.log(data[i].type, data[i].lockAmount, nowPrice, false, trade_slug, "upbit");
           await sell(data[i].type, data[i].lockAmount, nowPrice, false, trade_slug, "upbit");
         }
+        */
 
 
       }else if(result.side == "bid" && result.state=="wait" && differentMin>30){
