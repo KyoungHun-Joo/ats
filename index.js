@@ -441,9 +441,7 @@ async function upbitTrade(connection) {
     var buyFlag = false;
 
     if (valueStatus == 3) {
-      if((new Date().getMinutes())%5 != 0){
-        continue;
-      }
+
       var buyItem = {
         type:type,
         value:value,
@@ -525,7 +523,6 @@ async function upbitTrade(connection) {
 }
 
 async function call(event, context, callback) {
-  console.log('call?')
   if(sellAfterWait>0){
     const timeDiff = new Date().getTime() - sellAfterWait;
     if(timeDiff > 10 *60 * 1000){
@@ -592,14 +589,10 @@ async function recall() {
 }
 
 if (type == "upbit") {
-  console.log('tetet')
   // second minute hour day-of-month month day-of-week
-  cron.schedule("* * * * *", function () {
-    console.log('call trade')
-   call();
+  cron.schedule("* * * * *", async function () {
+    await call();
   });
 } else {
-  console.log('tetet11')
-
   exports.handler = call;
 }
