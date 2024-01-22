@@ -269,37 +269,15 @@ async function compareRSI4(connection, priceArr, coinPrice) {
 async function checkOrder() {
   const [data, fields] = await connection.execute("SELECT * FROM trade_log WHERE status=0 AND order_id != '' ");
   const [biteFlag, fileds] = await connection.execute("SELECT status, slug FROM variable WHERE `key` = 'upbitBiteFlag' ");
-
   var marketPriceData = {};
-
   if (!data) return;
-  var upbitCoinData = {};
+
   for (let i = 0; i < data.length; i++) {
     if (!data[i].order_id) return;
     try {
       var trade_amount = 0;
       var trade_fee = 0;
       var trade_units = 0;
-      var trade_slug = data[i].slug;
-      /*
-      result { uuid: '7597a297-7c2e-43dc-ac56-34849ecd3e38',
-      side: 'ask',
-      ord_type: 'limit',
-      price: '2939000.0',
-      state: 'cancel',
-      market: 'KRW-ETH',
-      created_at: '2021-06-16T17:27:00+09:00',
-      volume: '0.2703',
-      remaining_volume: '0.2703',
-      reserved_fee: '0.0',
-      remaining_fee: '0.0',
-      paid_fee: '0.0',
-      locked: '0.2703',
-      executed_volume: '0.0',
-      trades_count: 0,
-      trades: [] }
-      */
-    
       var result = await upbit.orderInfo(data[i].order_id);
       var nowPrice = 0;
       if(data[i].slug in marketPriceData){
@@ -463,7 +441,9 @@ async function upbitTrade(connection) {
     var buyFlag = false;
 
     if (valueStatus == 3) {
-      
+      if((new Date().getMinutes())%5 != 0){
+        continue;
+      }
       var buyItem = {
         type:type,
         value:value,
@@ -535,7 +515,7 @@ async function upbitTrade(connection) {
     } else if (valueStatus == 4) {
       var coinPrice = marketPriceData[slug]
       
-      console.log("coinPrice", lockAmount, lastPrice, slug, coinPrice);
+      //console.log("coinPrice", lockAmount, lastPrice, slug, coinPrice);
       //if(await upbitCompare(2,0,lastPrice,coinPrice)) await sell(type,lockAmount,coinPrice,false,slug,"upbit")
 
       await sell(type, lockAmount, lastPrice * 1.0055, false, slug, "upbit");
