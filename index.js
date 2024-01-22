@@ -525,6 +525,7 @@ async function upbitTrade(connection) {
 }
 
 async function call(event, context, callback) {
+  console.log('call?')
   if(sellAfterWait>0){
     const timeDiff = new Date().getTime() - sellAfterWait;
     if(timeDiff > 10 *60 * 1000){
@@ -532,7 +533,7 @@ async function call(event, context, callback) {
       sellAfterWait = 0;
     }
   }
-  
+
   const cmc_key = getCmcKey();
   connection = await mysql_dbc.init();
   try {
@@ -591,10 +592,14 @@ async function recall() {
 }
 
 if (type == "upbit") {
+  console.log('tetet')
   // second minute hour day-of-month month day-of-week
-  cron.schedule("* * * * *", async function () {
-    await call();
+  cron.schedule("* * * * *", function () {
+    console.log('call trade')
+   call();
   });
 } else {
+  console.log('tetet11')
+
   exports.handler = call;
 }
